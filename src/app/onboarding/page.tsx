@@ -54,8 +54,9 @@ export default function OnboardingPage() {
         setSelectedPreferences(prev => prev.filter(p => p !== pref))
     }
 
-    const handleResumeScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
+    const handleResumeScan = async () => {
+        const fileInput = document.getElementById('resume-upload') as HTMLInputElement
+        const file = fileInput?.files?.[0]
         if (!file) return
 
         setIsScanning(true)
@@ -212,38 +213,57 @@ export default function OnboardingPage() {
                                     <p className="text-muted-foreground mt-2">Optional: Get instant AI feedback on your resume</p>
                                 </div>
 
-                                <div className="border-2 border-dashed border-white/10 rounded-lg p-8 text-center hover:bg-white/5 transition-colors">
-                                    <input
-                                        type="file"
-                                        id="resume-upload"
-                                        className="hidden"
-                                        accept=".pdf,.docx"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0]
-                                            if (file) setFileName(file.name)
-                                            handleResumeScan(e)
-                                        }}
-                                    />
-                                    <label htmlFor="resume-upload" className="cursor-pointer">
-                                        {isScanning ? (
-                                            <div className="flex flex-col items-center">
-                                                <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-                                                <p className="text-sm text-foreground">Analyzing resume...</p>
-                                                {fileName && <p className="text-xs text-muted-foreground mt-2">{fileName}</p>}
-                                            </div>
-                                        ) : (
+                                <div className="flex flex-col gap-4">
+                                    <div className="border-2 border-dashed border-white/10 rounded-lg p-8 text-center hover:bg-white/5 transition-colors">
+                                        <input
+                                            type="file"
+                                            id="resume-upload"
+                                            className="hidden"
+                                            accept=".pdf,.docx"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                if (file) {
+                                                    setFileName(file.name)
+                                                    // Clear previous results when new file selected
+                                                    setScanResult(null)
+                                                }
+                                            }}
+                                        />
+                                        <label htmlFor="resume-upload" className="cursor-pointer block w-full">
                                             <div className="flex flex-col items-center">
                                                 <Upload className="w-10 h-10 text-muted-foreground mb-4" />
                                                 <p className="text-sm font-medium text-foreground">Click to upload resume</p>
                                                 <p className="text-xs text-muted-foreground mt-1">PDF or DOCX (Max 5MB)</p>
                                                 {fileName && <p className="text-xs text-green-400 mt-2 font-medium">Selected: {fileName}</p>}
                                             </div>
-                                        )}
-                                    </label>
+                                        </label>
+                                    </div>
+
+                                    {/* Scan Button - Only show if file selected and not scanning */}
+                                    {fileName && !scanResult && (
+                                        <button
+                                            type="button"
+                                            onClick={handleResumeScan}
+                                            disabled={isScanning}
+                                            className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                            {isScanning ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    Analyzing Resume...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Scan Resume <ArrowRight className="w-4 h-4" />
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
                                 </div>
 
+                                {/* Results Section */}
                                 {scanResult && (
-                                    <div className="bg-white/5 rounded-lg p-6 border border-white/10 space-y-4">
+                                    <div className="bg-white/5 rounded-lg p-6 border border-white/10 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                         <div className="flex items-center justify-between">
                                             <span className="font-medium text-foreground">ATS Score</span>
                                             <span className={`text-xl font-bold ${scanResult.overall_score >= 80 ? 'text-green-400' : scanResult.overall_score >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
@@ -272,7 +292,7 @@ export default function OnboardingPage() {
                                     </div>
                                 )}
 
-                                <div className="flex gap-4">
+                                <div className="flex gap-4 pt-4 border-t border-white/5">
                                     <button
                                         type="button"
                                         onClick={() => setStep(1)}
@@ -285,7 +305,7 @@ export default function OnboardingPage() {
                                         onClick={() => setStep(3)}
                                         className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90"
                                     >
-                                        Skip / Next
+                                        {scanResult ? "Continue with Results" : "Skip / Next"}
                                     </button>
                                 </div>
                             </div>
@@ -325,7 +345,7 @@ export default function OnboardingPage() {
                                             <h3 className="font-semibold text-foreground">Pro</h3>
                                             <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">Recommended</span>
                                         </div>
-                                        <p className="text-2xl font-bold text-foreground mt-2">$29<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                                        <p className="text-2xl font-bold text-foreground mt-2">$5.99<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                                         <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                                             <li className="flex items-center"><Check className="w-4 h-4 mr-2 text-green-400" /> Unlimited job views</li>
                                             <li className="flex items-center"><Check className="w-4 h-4 mr-2 text-green-400" /> AI Resume Scanner</li>

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { signout } from '@/app/auth/actions'
-import { ThemeToggle } from '@/components/theme-toggle'
+
 
 export default async function Navbar() {
     const supabase = await createClient()
@@ -43,7 +43,7 @@ export default async function Navbar() {
                         )}
                     </div>
                     <div className="flex items-center gap-4">
-                        <ThemeToggle />
+                        {/* ThemeToggle removed */}
                         {user ? (
                             <>
                                 <Link
