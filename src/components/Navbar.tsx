@@ -15,6 +15,16 @@ export default async function Navbar() {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 justify-between items-center">
                     <div className="flex items-center gap-8">
+                        {/* Mobile Sign In - Left Side */}
+                        {!user && (
+                            <Link
+                                href="/login"
+                                className="block sm:hidden text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                                Sign in
+                            </Link>
+                        )}
+
                         {/* Logo positioned absolutely in the center */}
                         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                             <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
@@ -65,7 +75,7 @@ export default async function Navbar() {
                             <>
                                 <Link
                                     href="/login"
-                                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                                    className="hidden sm:block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                                 >
                                     Sign in
                                 </Link>
