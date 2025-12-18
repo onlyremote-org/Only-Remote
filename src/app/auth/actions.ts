@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getURL } from '@/lib/utils'
 
 export async function login(_prevState: any, formData: FormData) {
     const supabase = await createClient()
@@ -37,7 +38,7 @@ export async function signup(_prevState: any, formData: FormData) {
             data: {
                 full_name: fullName,
             },
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboarding`,
+            emailRedirectTo: `${getURL()}auth/callback?next=/onboarding`,
         },
     })
 
@@ -62,7 +63,7 @@ export async function signInWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+            redirectTo: `${getURL()}auth/callback`,
         },
     })
 
@@ -80,7 +81,7 @@ export async function signInWithLinkedIn() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+            redirectTo: `${getURL()}auth/callback`,
         },
     })
 
