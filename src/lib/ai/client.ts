@@ -8,7 +8,7 @@ if (!apiKey) {
 
 export const aiClient = new OpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
-    apiKey: apiKey,
+    apiKey: apiKey || 'dummy-key-for-build',
     defaultHeaders: {
         'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
         'X-Title': 'Only Remote',

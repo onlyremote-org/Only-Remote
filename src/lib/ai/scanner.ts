@@ -1,9 +1,6 @@
-import OpenAI from 'openai'
+import { aiClient } from './client'
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENROUTER_API_KEY,
-    baseURL: 'https://openrouter.ai/api/v1',
-})
+const openai = aiClient
 
 export async function scanResume(resumeText: string, jobDescription: string) {
     try {
