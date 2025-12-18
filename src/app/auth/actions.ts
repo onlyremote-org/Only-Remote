@@ -63,7 +63,7 @@ export async function signInWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${getURL()}auth/callback`,
+            redirectTo: `${getURL()}auth/callback?next=/jobs`,
         },
     })
 
@@ -81,7 +81,7 @@ export async function signInWithLinkedIn() {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
-            redirectTo: `${getURL()}auth/callback`,
+            redirectTo: `${getURL()}auth/callback?next=/jobs`,
         },
     })
 
