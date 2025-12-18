@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  /* Light Theme (Default) - Professional & Trustworthy */
+  --background: #F8FAFC;
+  /* Slate 50 */
+  --foreground: #132238;
+  /* Deep Harbor Navy */
+
+  --primary: #4A90E2;
+  /* Clear Sky Blue */
+  --primary-foreground: #ffffff;
+
+  --secondary: #F1F5F9;
+  /* Slate 100 - For tags/muted backgrounds */
+  --secondary-foreground: #475569;
+  /* Slate 600 */
+
+  --muted: #F1F5F9;
+  /* Slate 100 */
+  --muted-foreground: #475569;
+  /* Slate 600 */
+
+  --accent: #00C897;
+  /* Growth Teal */
+  --accent-foreground: #ffffff;
+
+  --card: #FFFFFF;
+  --card-foreground: #132238;
+
+  --border: #E2E8F0;
+  /* Slate 200 */
+}
+
+.dark {
+  /* Dark Theme - Deep Harbor Navy */
+  --background: #132238;
+  /* Deep Harbor Navy */
+  --foreground: #FFFFFF;
+
+  --primary: #4A90E2;
+  /* Clear Sky Blue */
+  --primary-foreground: #ffffff;
+
+  --secondary: #0F172A;
+  /* Very Dark Navy - For tags */
+  --secondary-foreground: #CBD5E1;
+  /* Slate 300 */
+
+  --muted: #0F172A;
+  --muted-foreground: #CBD5E1;
+
+  --accent: #00C897;
+  /* Growth Teal */
+  --accent-foreground: #ffffff;
+
+  --card: #1E2F4F;
+  /* Lighter Navy */
+  --card-foreground: #FFFFFF;
+
+  --border: #1E2F4F;
+  /* Matching Card background for subtle borders */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Utilities for Glassmorphism */
+@utility glass {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
