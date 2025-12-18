@@ -72,8 +72,8 @@ export function JobsSidebarLayout({ children, user }: JobsSidebarLayoutProps) {
     return (
         <div
             className={cn(
-                'rounded-md flex flex-col md:flex-row bg-muted/20 w-full flex-1 mx-auto border border-border overflow-hidden',
-                'h-screen'
+                'rounded-md flex flex-col md:flex-row bg-muted/20 w-full flex-1 mx-auto border border-border',
+                'min-h-[calc(100vh-4rem)] md:h-screen md:overflow-hidden'
             )}
         >
             <Sidebar open={open} setOpen={setOpen}>
@@ -149,7 +149,7 @@ export function JobsSidebarLayout({ children, user }: JobsSidebarLayoutProps) {
                 </SidebarBody>
             </Sidebar>
             <div className="flex flex-1">
-                <div className="p-2 md:p-10 rounded-tl-2xl border border-border bg-background flex flex-col gap-2 flex-1 w-full h-full overflow-y-auto">
+                <div className="p-4 md:p-10 rounded-tl-2xl border border-border bg-background flex flex-col gap-2 flex-1 w-full h-full md:overflow-y-auto">
                     {children}
                 </div>
             </div>

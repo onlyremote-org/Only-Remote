@@ -48,11 +48,11 @@ export default async function Navbar() {
                             <>
                                 <Link
                                     href="/dashboard"
-                                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                                    className="hidden md:block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                                 >
                                     Dashboard
                                 </Link>
-                                <form action={signout}>
+                                <form action={signout} className="hidden md:block">
                                     <button
                                         type="submit"
                                         className="rounded-full bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80 ring-1 ring-border"
