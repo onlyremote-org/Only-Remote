@@ -3,6 +3,7 @@ import { extractTextFromPdf, extractTextFromDocx, normalizeWhitespace } from '@/
 import { analyzeResumeForAts } from '@/lib/ai/resumeAnalysis'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60 // Allow 60 seconds for AI processing
 
 export async function POST(request: NextRequest) {
     try {

@@ -71,29 +71,46 @@ export default function OnboardingPage() {
                 method: 'POST',
                 body: formData,
             })
-            // Check if response is ok before parsing JSON
+
+            const text = await response.text()
+
+            // Handle HTTP Errors
             if (!response.ok) {
-                const text = await response.text()
                 console.error('Scan failed with status:', response.status, text)
-                // Try to parse error as JSON if possible, else throw
+
+                if (response.status === 413) {
+                    throw new Error('File is too large for the server.')
+                }
+                if (response.status === 504) {
+                    throw new Error('Analysis timed out. Please try a smaller file.')
+                }
+
+                // Try to parse error as JSON
                 try {
                     const json = JSON.parse(text)
-                    throw new Error(json.error?.message || 'Scan failed')
+                    throw new Error(json.error?.message || `Server Error (${response.status})`)
                 } catch (e) {
-                    // If existing error is already meaningful, use it. Otherwise use generic info.
-                    if (e instanceof Error && e.message !== 'Unexpected token') {
-                        throw e
-                    }
-                    throw new Error(`Server error: ${response.status} - ${text.substring(0, 50)}`)
+                    // If parsing failed, use the status text or raw text if short
+                    throw new Error(`Server Error (${response.status})`)
                 }
             }
 
-            const result = await response.json()
-            if (result.success) {
-                setScanResult(result.data)
-            } else {
-                throw new Error(result.error?.message || 'Unknown error occurred')
+            // Handle Success
+            if (!text) {
+                throw new Error('Empty response from server')
             }
+
+            try {
+                const result = await JSON.parse(text)
+                if (result.success) {
+                    setScanResult(result.data)
+                } else {
+                    throw new Error(result.error?.message || 'Unknown error occurred')
+                }
+            } catch (e) {
+                throw new Error('Invalid response from server')
+            }
+
         } catch (error) {
             console.error('Scan failed:', error)
             setScanError(error instanceof Error ? error.message : 'Failed to scan resume')
@@ -232,9 +249,17 @@ export default function OnboardingPage() {
                                             onChange={(e) => {
                                                 const file = e.target.files?.[0]
                                                 if (file) {
+                                                    // Validate size (4.5MB limit for Vercel)
+                                                    if (file.size > 4.5 * 1024 * 1024) {
+                                                        setResumeFile(null)
+                                                        setFileName('')
+                                                        setScanError('File is too large. Maximum size is 4.5MB.')
+                                                        e.target.value = '' // Reset input
+                                                        return
+                                                    }
+
                                                     setResumeFile(file)
                                                     setFileName(file.name)
-                                                    // Clear previous results when new file selected
                                                     setScanResult(null)
                                                     setScanError('')
                                                 }
