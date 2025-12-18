@@ -28,6 +28,8 @@ export default function OnboardingPage() {
     const [isScanning, setIsScanning] = useState(false)
     const [fileName, setFileName] = useState('')
     const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro'>('free')
+    const [resumeFile, setResumeFile] = useState<File | null>(null)
+    const [scanError, setScanError] = useState<string>('')
 
     // Form state for final submission
     const [state, formAction, isPending] = useActionState(completeOnboarding, { error: '' })
@@ -55,13 +57,14 @@ export default function OnboardingPage() {
     }
 
     const handleResumeScan = async () => {
-        const fileInput = document.getElementById('resume-upload') as HTMLInputElement
-        const file = fileInput?.files?.[0]
-        if (!file) return
+        if (!resumeFile) return
 
         setIsScanning(true)
+        setScanError('')
+        setScanResult(null) // Reset result
+
         const formData = new FormData()
-        formData.append('file', file)
+        formData.append('file', resumeFile)
 
         try {
             const response = await fetch('/api/resume/analyze', {
@@ -76,18 +79,24 @@ export default function OnboardingPage() {
                 try {
                     const json = JSON.parse(text)
                     throw new Error(json.error?.message || 'Scan failed')
-                } catch {
-                    throw new Error(`Server error: ${response.status}`)
+                } catch (e) {
+                    // If existing error is already meaningful, use it. Otherwise use generic info.
+                    if (e instanceof Error && e.message !== 'Unexpected token') {
+                        throw e
+                    }
+                    throw new Error(`Server error: ${response.status} - ${text.substring(0, 50)}`)
                 }
             }
 
             const result = await response.json()
             if (result.success) {
                 setScanResult(result.data)
+            } else {
+                throw new Error(result.error?.message || 'Unknown error occurred')
             }
         } catch (error) {
             console.error('Scan failed:', error)
-            // Ideally show error to user here
+            setScanError(error instanceof Error ? error.message : 'Failed to scan resume')
         } finally {
             setIsScanning(false)
         }
@@ -223,9 +232,11 @@ export default function OnboardingPage() {
                                             onChange={(e) => {
                                                 const file = e.target.files?.[0]
                                                 if (file) {
+                                                    setResumeFile(file)
                                                     setFileName(file.name)
                                                     // Clear previous results when new file selected
                                                     setScanResult(null)
+                                                    setScanError('')
                                                 }
                                             }}
                                         />
@@ -258,6 +269,13 @@ export default function OnboardingPage() {
                                                 </>
                                             )}
                                         </button>
+                                    )}
+
+                                    {/* Error Message */}
+                                    {scanError && (
+                                        <div className="text-red-400 text-sm text-center bg-red-400/10 p-3 rounded border border-red-400/20 animate-in fade-in slide-in-from-top-2">
+                                            Error: {scanError}
+                                        </div>
                                     )}
                                 </div>
 
