@@ -31,6 +31,11 @@ export async function signup(_prevState: any, formData: FormData) {
     const password = formData.get('password') as string
     const fullName = formData.get('fullName') as string
 
+    // Validate inputs
+    if (!email || !password || !fullName) {
+        return { error: 'Please fill in all fields.', message: '' }
+    }
+
     try {
         const { error } = await supabase.auth.signUp({
             email,
@@ -44,12 +49,17 @@ export async function signup(_prevState: any, formData: FormData) {
         })
 
         if (error) {
-            console.error('Signup error:', error)
-            return { error: error.message }
+            console.error('Signup error object:', error)
+            // Ensure we return a string, even if error.message is missing
+            const errorMessage = error.message && typeof error.message === 'string'
+                ? error.message
+                : 'Failed to create account. Please try again.'
+
+            return { error: errorMessage, message: '' }
         }
     } catch (err) {
         console.error('Unexpected signup error:', err)
-        return { error: 'An unexpected error occurred. Please try again.' }
+        return { error: 'An unexpected system error occurred.', message: '' }
     }
 
     revalidatePath('/', 'layout')
