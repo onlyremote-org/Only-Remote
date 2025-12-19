@@ -7,9 +7,13 @@ export const maxDuration = 60 // Allow 60 seconds for AI processing
 
 export async function POST(request: NextRequest) {
     try {
-        // TODO: Add authentication check here
-        // const session = await auth()
-        // if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const { createClient } = await import('@/lib/supabase/server')
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
 
         const formData = await request.formData()
         const file = formData.get('file') as File
