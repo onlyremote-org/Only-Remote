@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useActionState } from 'react'
 import { forgotPassword } from '../auth/actions'
 
+export const maxDuration = 60;
+
 const initialState = {
     error: '',
     message: '',

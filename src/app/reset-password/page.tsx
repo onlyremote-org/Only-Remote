@@ -4,6 +4,8 @@ import { useActionState, useState } from 'react'
 import { updatePassword } from '../auth/actions'
 import { Eye, EyeOff } from 'lucide-react'
 
+export const maxDuration = 60;
+
 const initialState = {
     error: '',
 }

@@ -88,15 +88,34 @@ export async function forgotPassword(_prevState: any, formData: FormData) {
     const supabase = await createClient()
     const email = formData.get('email') as string
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${getURL()}auth/callback?next=/reset-password`,
-    })
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${getURL()}auth/callback?next=/reset-password`,
+        })
 
-    if (error) {
-        return { error: error.message }
+        if (error) {
+            console.error('Forgot password error:', error)
+            // Handle 504/Timeout from Supabase
+            if (error.status === 504 || error.name === 'AuthRetryableFetchError') {
+                return {
+                    error: 'Connection timed out. Please check your email inbox (and spam) - the reset link may have been sent despite this error.',
+                    message: ''
+                }
+            }
+            return { error: error.message, message: '' }
+        }
+    } catch (err: any) {
+        // Handle generic timeout in catch block
+        if (err?.status === 504 || err?.name === 'AuthRetryableFetchError') {
+            return {
+                error: 'Connection timed out. Please check your email inbox (and spam) - the reset link may have been sent despite this error.',
+                message: ''
+            }
+        }
+        return { error: 'An unexpected error occurred.', message: '' }
     }
 
-    return { message: 'Check your email for a password reset link.' }
+    return { message: 'Check your email for a password reset link.', error: '' }
 }
 
 export async function updatePassword(_prevState: any, formData: FormData) {
@@ -104,14 +123,22 @@ export async function updatePassword(_prevState: any, formData: FormData) {
     const password = formData.get('password') as string
     const confirmPassword = formData.get('confirmPassword') as string
 
+    if (!password || !confirmPassword) {
+        return { error: 'Password is required' }
+    }
+
     if (password !== confirmPassword) {
         return { error: 'Passwords do not match' }
     }
 
-    const { error } = await supabase.auth.updateUser({ password })
+    try {
+        const { error } = await supabase.auth.updateUser({ password })
 
-    if (error) {
-        return { error: error.message }
+        if (error) {
+            return { error: error.message }
+        }
+    } catch (error) {
+        return { error: 'An unexpected error occurred' }
     }
 
     revalidatePath('/', 'layout')
