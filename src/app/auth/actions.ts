@@ -55,16 +55,14 @@ export async function signup(_prevState: any, formData: FormData) {
 
         if (error) {
             console.error('Signup error object:', error)
-            // Ensure we return a string, even if error.message is missing
-            const errorMessage = error.message && typeof error.message === 'string'
-                ? error.message
-                : 'Failed to create account. Please try again.'
-
-            return { error: errorMessage, message: '' }
+            // CRITICAL DEBUG: Dump the entire object to see why it behaves like "{}"
+            const rawError = JSON.stringify(error, null, 2)
+            return { error: `SUPABASE ERROR RAW: ${rawError}`, message: '' }
         }
     } catch (err) {
         console.error('Unexpected signup error:', err)
-        return { error: 'An unexpected system error occurred.', message: '' }
+        const rawErr = JSON.stringify(err, null, 2)
+        return { error: `CATCH ERROR RAW: ${rawErr}`, message: '' }
     }
 
     revalidatePath('/', 'layout')
