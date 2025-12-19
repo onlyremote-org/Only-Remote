@@ -13,7 +13,7 @@ export async function sendEmail({
 }) {
     try {
         const data = await resend.emails.send({
-            from: 'Only Remote <onboarding@resend.dev>', // Use resend.dev for testing
+            from: 'Only Remote <no-reply@onlyremote.org>',
             to,
             subject,
             html,
