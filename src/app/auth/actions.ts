@@ -5,8 +5,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getURL } from '@/lib/utils'
 
-export const maxDuration = 60
-
 export async function login(_prevState: any, formData: FormData) {
     const supabase = await createClient()
 

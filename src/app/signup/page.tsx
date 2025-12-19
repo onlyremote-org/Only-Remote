@@ -5,6 +5,8 @@ import { useActionState, useState } from 'react'
 import { signup, signInWithGoogle, signInWithLinkedIn } from '../auth/actions'
 import { Eye, EyeOff } from 'lucide-react'
 
+export const maxDuration = 60;
+
 const initialState = {
     error: '',
     message: '',
