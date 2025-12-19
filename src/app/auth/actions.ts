@@ -36,6 +36,11 @@ export async function signup(_prevState: any, formData: FormData) {
         return { error: 'Please fill in all fields.', message: '' }
     }
 
+    // DEBUG TRAP: Verify we can reach this code
+    if (email.includes('debug')) {
+        return { error: 'DEBUG TRAP ACTIVE - SERVER IS REACHABLE', message: '' }
+    }
+
     try {
         const { error } = await supabase.auth.signUp({
             email,
