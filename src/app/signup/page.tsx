@@ -133,9 +133,16 @@ export default function SignupPage() {
                             </div>
                         )}
 
-                        {state?.error && (
+                        {state?.error && typeof state.error === 'string' && (
                             <div className="rounded-md bg-red-500/10 p-3 text-sm text-red-500 text-center border border-red-500/20">
                                 {state.error}
+                            </div>
+                        )}
+
+                        {/* Debug: Handle non-string errors to see what they are */}
+                        {state?.error && typeof state.error !== 'string' && (
+                            <div className="rounded-md bg-yellow-500/10 p-3 text-xs text-yellow-500 text-center border border-yellow-500/20">
+                                Debug Error format: {JSON.stringify(state.error)}
                             </div>
                         )}
 
@@ -186,6 +193,9 @@ export default function SignupPage() {
                         </div>
                     </div>
                 </div>
+                <p className="text-center text-xs text-muted-foreground/30 mt-8">
+                    Secure Sign Up • v2.0
+                </p>
             </div>
         </div>
     )
