@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getURL } from '@/lib/utils'
 
+export const maxDuration = 60
+
 export async function login(_prevState: any, formData: FormData) {
     const supabase = await createClient()
 
@@ -36,11 +38,6 @@ export async function signup(_prevState: any, formData: FormData) {
         return { error: 'Please fill in all fields.', message: '' }
     }
 
-    // DEBUG TRAP: Verify we can reach this code
-    if (email.includes('debug')) {
-        return { error: 'DEBUG TRAP ACTIVE - SERVER IS REACHABLE', message: '' }
-    }
-
     try {
         const { error } = await supabase.auth.signUp({
             email,
@@ -55,14 +52,33 @@ export async function signup(_prevState: any, formData: FormData) {
 
         if (error) {
             console.error('Signup error object:', error)
-            // CRITICAL DEBUG: Dump the entire object to see why it behaves like "{}"
-            const rawError = JSON.stringify(error, null, 2)
-            return { error: `SUPABASE ERROR RAW: ${rawError}`, message: '' }
+
+            // Handle specific 504/Timeout errors from Supabase
+            if (error.status === 504 || error.name === 'AuthRetryableFetchError') {
+                return {
+                    error: 'Connection timed out. Please check your email inbox (and spam) - the confirmation link may have been sent despite this error.',
+                    message: ''
+                }
+            }
+
+            const errorMessage = error.message && typeof error.message === 'string'
+                ? error.message
+                : 'Failed to create account. Please try again.'
+
+            return { error: errorMessage, message: '' }
         }
-    } catch (err) {
+    } catch (err: any) {
         console.error('Unexpected signup error:', err)
-        const rawErr = JSON.stringify(err, null, 2)
-        return { error: `CATCH ERROR RAW: ${rawErr}`, message: '' }
+
+        // Handle generic timeout in catch block
+        if (err?.status === 504 || err?.name === 'AuthRetryableFetchError') {
+            return {
+                error: 'Connection timed out. Please check your email inbox (and spam) - the confirmation link may have been sent despite this error.',
+                message: ''
+            }
+        }
+
+        return { error: 'An unexpected error occurred. Please try again.', message: '' }
     }
 
     revalidatePath('/', 'layout')

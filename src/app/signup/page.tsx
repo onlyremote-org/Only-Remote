@@ -41,11 +41,6 @@ export default function SignupPage() {
                     </p>
                 </div>
                 <div className="mt-8 bg-card py-8 px-4 shadow-2xl ring-1 ring-white/10 sm:rounded-xl sm:px-10 border border-white/5">
-                    {/* CONFIRMATION DUMP for finding "{}" */}
-                    <div className="mb-4 text-xs font-mono bg-black/50 p-2 rounded text-blue-300 break-all border border-blue-500/20">
-                        RAW STATE: {JSON.stringify(state)}
-                    </div>
-
                     <form action={handleSubmit} className="space-y-6">
                         <div className="space-y-4">
                             <div>
