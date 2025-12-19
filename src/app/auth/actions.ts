@@ -31,24 +31,64 @@ export async function signup(_prevState: any, formData: FormData) {
     const password = formData.get('password') as string
     const fullName = formData.get('fullName') as string
 
-    const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-            data: {
-                full_name: fullName,
+    try {
+        const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    full_name: fullName,
+                },
+                emailRedirectTo: `${getURL()}auth/callback?next=/onboarding`,
             },
-            emailRedirectTo: `${getURL()}auth/callback?next=/onboarding`,
-        },
+        })
+
+        if (error) {
+            console.error('Signup error:', error)
+            return { error: error.message }
+        }
+    } catch (err) {
+        console.error('Unexpected signup error:', err)
+        return { error: 'An unexpected error occurred. Please try again.' }
+    }
+
+    revalidatePath('/', 'layout')
+    // Redirect to verify-email page
+    redirect('/verify-email')
+}
+
+export async function forgotPassword(_prevState: any, formData: FormData) {
+    const supabase = await createClient()
+    const email = formData.get('email') as string
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${getURL()}auth/callback?next=/reset-password`,
     })
 
     if (error) {
         return { error: error.message }
     }
 
+    return { message: 'Check your email for a password reset link.' }
+}
+
+export async function updatePassword(_prevState: any, formData: FormData) {
+    const supabase = await createClient()
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (password !== confirmPassword) {
+        return { error: 'Passwords do not match' }
+    }
+
+    const { error } = await supabase.auth.updateUser({ password })
+
+    if (error) {
+        return { error: error.message }
+    }
+
     revalidatePath('/', 'layout')
-    // Redirect to verify-email page
-    redirect('/verify-email')
+    redirect('/dashboard')
 }
 
 export async function signout() {
