@@ -13,25 +13,14 @@ export default function AboutPage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-24">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tight text-foreground mb-6">Our Mission</h2>
-                        <p className="text-lg text-muted-foreground mb-6">
-                            Only Remote was built with a simple belief: talent is everywhere, but opportunity is not. We bridge that gap by curating the best remote jobs from around the world and making them accessible to everyone.
-                        </p>
-                        <p className="text-lg text-muted-foreground">
-                            Whether you're a developer in Brazil, a designer in Japan, or a marketer in the US, we believe you should have access to high-quality work that fits your lifestyle.
-                        </p>
-                    </div>
-                    <div className="relative h-64 md:h-96 rounded-2xl overflow-hidden bg-secondary/50 border border-border flex items-center justify-center">
-                        <Image
-                            src="/logo-v2.png"
-                            alt="Only Remote Mission"
-                            width={200}
-                            height={200}
-                            className="object-contain opacity-50"
-                        />
-                    </div>
+                <div className="mx-auto max-w-3xl mb-24">
+                    <h2 className="text-3xl font-bold tracking-tight text-foreground mb-6">Our Mission</h2>
+                    <p className="text-lg text-muted-foreground mb-6">
+                        Only Remote was built with a simple belief: talent is everywhere, but opportunity is not. We bridge that gap by curating the best remote jobs from around the world and making them accessible to everyone.
+                    </p>
+                    <p className="text-lg text-muted-foreground">
+                        Whether you're a developer in Brazil, a designer in Japan, or a marketer in the US, we believe you should have access to high-quality work that fits your lifestyle.
+                    </p>
                 </div>
 
                 <div className="mx-auto max-w-3xl">

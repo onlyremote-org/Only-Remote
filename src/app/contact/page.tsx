@@ -24,14 +24,7 @@ export default function ContactPage() {
                         </p>
                     </div>
 
-                    <div className="mt-12">
-                        <h3 className="text-lg font-semibold text-foreground mb-2">Mailing Address</h3>
-                        <p className="text-muted-foreground">
-                            Only Remote, Inc.<br />
-                            123 Remote Way<br />
-                            Cloud City, Internet 99999
-                        </p>
-                    </div>
+
                 </div>
             </div>
         </div>
