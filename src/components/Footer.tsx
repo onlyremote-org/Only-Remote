@@ -60,13 +60,13 @@ export default function Footer() {
                 <div className="flex flex-col items-center text-center gap-8">
                     <div className="space-y-8">
                         <div className="flex items-center justify-center gap-2">
-                            <div className="relative h-24 w-auto min-w-[96px]">
+                            <div className="relative h-12 w-auto md:h-16">
                                 <Image
                                     src="/logo-v2.png"
                                     alt="Only Remote Logo"
-                                    height={96}
-                                    width={96}
-                                    className="object-contain"
+                                    height={64}
+                                    width={64}
+                                    className="object-contain brightness-0 dark:invert"
                                 />
                             </div>
                         </div>
