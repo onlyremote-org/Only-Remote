@@ -151,27 +151,8 @@ export default function OnboardingPage() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div>
-                                        <label htmlFor="fullName" className="block text-sm font-medium text-foreground">Full Name</label>
-                                        <input
-                                            type="text"
-                                            name="fullName"
-                                            id="fullName"
-                                            required
-                                            className="mt-1 block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-foreground shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-primary sm:text-sm"
-                                            placeholder="John Doe"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="website" className="block text-sm font-medium text-foreground">Website / Portfolio</label>
-                                        <input
-                                            type="url"
-                                            name="website"
-                                            id="website"
-                                            className="mt-1 block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-foreground shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-primary sm:text-sm"
-                                            placeholder="https://example.com"
-                                        />
-                                    </div>
+                                    {/* Personal details removed as per user request (collected at signup) */}
+
                                     <div>
                                         <label className="block text-sm font-medium text-foreground mb-1">Job Preferences</label>
                                         <p className="text-xs text-muted-foreground mb-3">

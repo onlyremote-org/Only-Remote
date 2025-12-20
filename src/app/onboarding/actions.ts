@@ -14,16 +14,13 @@ export async function completeOnboarding(_prevState: any, formData: FormData) {
         return { error: 'Not authenticated' }
     }
 
-    const fullName = formData.get('fullName') as string
-    const website = formData.get('website') as string
     const preferences = JSON.parse(formData.get('preferences') as string || '[]')
     const plan = formData.get('plan') as string
 
     const { error } = await supabase
         .from('profiles')
         .update({
-            full_name: fullName,
-            website: website,
+            // full_name and website are now handled at signup/profile creation not here
             job_preferences: preferences,
             subscription_tier: plan,
             subscription_status: plan === 'pro' ? 'trialing' : 'active',
@@ -39,9 +36,10 @@ export async function completeOnboarding(_prevState: any, formData: FormData) {
     // Send onboarding completion email
     try {
         const { sendOnboardingCompleteEmail } = await import('@/lib/email/events')
+        // Get name from metadata since we don't ask for it anymore
+        const fullName = user.user_metadata.full_name || ''
         const firstName = fullName.split(' ')[0]
-        // We need the user's email. It might be in user object or we fetch it.
-        // user object from auth.getUser() has email.
+
         if (user.email) {
             await sendOnboardingCompleteEmail(user.email, firstName)
         }
@@ -50,6 +48,6 @@ export async function completeOnboarding(_prevState: any, formData: FormData) {
         // Don't block redirect
     }
 
-    revalidatePath('/dashboard')
-    redirect('/dashboard')
+    revalidatePath('/jobs')
+    redirect('/jobs')
 }

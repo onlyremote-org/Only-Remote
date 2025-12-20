@@ -12,7 +12,7 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
 
     if (sources.includes('remotive')) promises.push(fetchRemotiveJobs(params))
     if (sources.includes('remoteok')) promises.push(fetchRemoteOKJobs(params))
-    if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
+    // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
     if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs(params))
 
     // Always fetch H1B if not explicitly excluded, or if specifically requested
