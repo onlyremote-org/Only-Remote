@@ -18,7 +18,7 @@ export function CoverLetterModal({ isOpen, onClose, job, userName }: CoverLetter
     const [error, setError] = useState('')
 
     useEffect(() => {
-        if (isOpen && !coverLetter) {
+        if (isOpen) {
             generateCoverLetter()
         }
     }, [isOpen])
