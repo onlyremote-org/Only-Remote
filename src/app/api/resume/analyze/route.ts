@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
                     score: analysis.overall_score,
                     // executive_summary is inside analysis json
                     analysis: analysis, // Schema expects 'analysis', not 'analysis_data'
+                    structured_resume: analysis.structured_resume, // Save structured data
                     created_at: new Date().toISOString(),
                 })
             }

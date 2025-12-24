@@ -12,9 +12,10 @@ interface JobCardProps {
     userName?: string
     matchScore?: number | null
     onGenerateCoverLetter?: (job: Job) => void
+    onViewJob?: (job: Job) => void
 }
 
-export function JobCard({ job, isSaved: initialSaved = false, userName = '', matchScore, onGenerateCoverLetter }: JobCardProps) {
+export function JobCard({ job, isSaved: initialSaved = false, userName = '', matchScore, onGenerateCoverLetter, onViewJob }: JobCardProps) {
     const [isSaved, setIsSaved] = useState(initialSaved)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -55,7 +56,16 @@ export function JobCard({ job, isSaved: initialSaved = false, userName = '', mat
                     </div>
                     <div className="min-w-0 flex-1">
                         <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight mb-1 pr-2">
-                            <a href={job.apply_url} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
+                            <a
+                                href={job.apply_url}
+                                onClick={(e) => {
+                                    if (onViewJob) {
+                                        e.preventDefault()
+                                        onViewJob(job)
+                                    }
+                                }}
+                                className="focus:outline-none"
+                            >
                                 <span className="absolute inset-0" aria-hidden="true" />
                                 {job.title}
                             </a>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Job } from '@/lib/jobs/types'
 import { JobCard } from './job-card'
+import { JobDetailModal } from '@/components/JobDetailModal'
 import { CoverLetterModal } from '@/components/CoverLetterModal'
 import { PaginationControls } from '@/components/pagination-controls'
 
@@ -19,9 +20,18 @@ export function JobsList({ jobs, savedJobIds, userName, resumeSkills, page, tota
     const [selectedJob, setSelectedJob] = useState<Job | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
+    // For View/Apply Modal
+    const [viewJob, setViewJob] = useState<Job | null>(null)
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+
     const handleGenerateCoverLetter = (job: Job) => {
         setSelectedJob(job)
         setIsModalOpen(true)
+    }
+
+    const handleViewJob = (job: Job) => {
+        setViewJob(job)
+        setIsViewModalOpen(true)
     }
 
     const calculateMatchScore = (job: Job) => {
@@ -49,6 +59,7 @@ export function JobsList({ jobs, savedJobIds, userName, resumeSkills, page, tota
                         userName={userName}
                         matchScore={calculateMatchScore(job)}
                         onGenerateCoverLetter={handleGenerateCoverLetter}
+                        onViewJob={handleViewJob}
                     />
                 ))}
             </div>
@@ -65,6 +76,14 @@ export function JobsList({ jobs, savedJobIds, userName, resumeSkills, page, tota
                     onClose={() => setIsModalOpen(false)}
                     job={selectedJob}
                     userName={userName}
+                />
+            )}
+
+            {viewJob && (
+                <JobDetailModal
+                    isOpen={isViewModalOpen}
+                    onClose={() => setIsViewModalOpen(false)}
+                    job={viewJob}
                 />
             )}
         </>

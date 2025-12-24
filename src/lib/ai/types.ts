@@ -10,6 +10,32 @@ export interface SectionAnalysis {
     issues: ResumeIssue[];
 }
 
+export interface StructuredResume {
+    professional_experience: {
+        company: string;
+        role: string;
+        start_date: string;
+        end_date: string;
+        description: string;
+    }[];
+    education: {
+        institution: string;
+        degree: string;
+        field: string;
+        start_date: string;
+        end_date: string;
+    }[];
+    projects: {
+        name: string;
+        description: string;
+        technologies: string[];
+    }[];
+    skills: {
+        category: string;
+        skills: string[];
+    }[];
+}
+
 export interface ResumeAnalysisResponse {
     overall_score: number;
     executive_summary: string;
@@ -20,4 +46,5 @@ export interface ResumeAnalysisResponse {
     };
     global_recommendations: string[];
     extracted_skills: string[];
+    structured_resume: StructuredResume;
 }

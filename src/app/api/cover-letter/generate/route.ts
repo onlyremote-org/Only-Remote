@@ -5,6 +5,36 @@ export async function POST(req: Request) {
     try {
         const { jobTitle, companyName, jobDescription, userName } = await req.json()
 
+        // Fetch user's latest structured resume if logged in
+        let userResumeContext = ''
+        if (userName) { // Assuming if userName is passed, we might have a user. Ideally we check auth.
+            const { createClient } = await import('@/lib/supabase/server')
+            const supabase = await createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (user) {
+                const { data: resume } = await supabase
+                    .from('resumes')
+                    .select('structured_resume')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single()
+
+                if (resume?.structured_resume) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const r = resume.structured_resume as any
+                    userResumeContext = `
+                     CANDIDATE BACKGROND:
+                     Work Experience: ${JSON.stringify(r.professional_experience)}
+                     Education: ${JSON.stringify(r.education)}
+                     Skills: ${JSON.stringify(r.skills)}
+                     Projects: ${JSON.stringify(r.projects)}
+                     `
+                }
+            }
+        }
+
         if (!jobTitle || !companyName) {
             return NextResponse.json(
                 { success: false, error: 'Missing required fields' },
@@ -33,7 +63,10 @@ export async function POST(req: Request) {
         const prompt = `
         Write a professional and persuasive cover letter for the following job application:
         
-        Candidate Name: ${userName || '[Your Name]'}
+        CANDIDATE NAME: ${userName || '[Your Name]'}
+        ${userResumeContext ? userResumeContext : ''}
+        
+        JOB DETAILS:
         Job Title: ${jobTitle}
         Company: ${companyName}
         Job Description Snippet: "${jobDescription || ''}"
@@ -42,6 +75,7 @@ export async function POST(req: Request) {
         1. Be addressed to the Hiring Manager.
         2. Express enthusiasm for the role and company.
         3. Highlight relevant skills based on the job title and description.
+           ${userResumeContext ? '- CRITICAL: You MUST explicitly mention 2-3 specific experiences or skills from the CANDIDATE BACKGROUND that match the JOB DETAILS. Connect the dots for the hiring manager.' : ''}
         4. Be concise (under 400 words).
         5. Use a professional tone.
         6. Include placeholders like [Your Phone Number] or [Your Email] only if necessary, but try to keep it ready to send.

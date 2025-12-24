@@ -35,57 +35,44 @@ Analyze on these specific dimensions:
 Output ONLY valid JSON matching this schema:
 {
   "overall_score": 0,
-  "executive_summary": "string (2 sentences on the overall strength)",
+  "executive_summary": "string (2 sentences)",
   "sections": {
-    "impact": {
-      "score": 0.0,
-      "issues": [
-        {
-          "original_text": "string (EXACT text substring from resume to highlight)",
-          "issue": "string (Short explanation of the flaw)",
-          "improvement": "string (Specific rewrite of the sentence with better metrics/verbs)"
-        }
-      ]
-    },
-    "terminology": {
-      "score": 0.0,
-      "issues": [
-        {
-          "original_text": "string (EXACT text substring, or empty string if global issue)",
-          "issue": "string",
-          "improvement": "string (e.g. 'Replace X with Y' or 'Add keyword Z')"
-        }
-      ]
-    },
-    "structure": {
-      "score": 0.0,
-      "issues": [
-        {
-          "location_hint": "string (e.g. 'Header', 'Experience Section')",
-          "issue": "string",
-          "improvement": "string"
-        }
-      ]
-    }
-  },
+    "impact": { "score": 0.0, "issues": [{ "original_text": "string", "issue": "string", "improvement": "string" }] },
+    "terminology": { "score": 0.0, "issues": [{ "original_text": "string", "issue": "string", "improvement": "string" }] },
+    "structure": { "score": 0.0, "issues": [{ "location_hint": "string", "issue": "string", "improvement": "string" }] }
   },
   "global_recommendations": ["string"],
-  "extracted_skills": ["string (List of top 10-15 hard/soft skills found in the resume)"]
+  "extracted_skills": ["string"],
+  "structured_resume": {
+    "professional_experience": [
+      { "company": "string", "role": "string", "start_date": "string", "end_date": "string", "description": "string (summarize key achievements)" }
+    ],
+    "education": [
+      { "institution": "string", "degree": "string", "field": "string", "start_date": "string", "end_date": "string" }
+    ],
+    "projects": [
+      { "name": "string", "description": "string", "technologies": ["string"] }
+    ],
+    "skills": [
+      { "category": "string (e.g. Languages, Frameworks)", "skills": ["string"] }
+    ]
+  }
 }
 
 Scoring Rules:
 - 0-100 integer scale.
 - Be harsh. A score of 100 means the resume is perfect.
 
+INSTRUCTIONS FOR 'structured_resume':
+- Extract facts objectively. Do not embellish.
+- Normalize dates to 'YYYY-MM' or 'YYYY'. Use 'Present' for current jobs.
+- If a section is missing, return an empty array.
+
 CRITICAL INSTRUCTIONS FOR 'original_text':
-- You must quote the resume text EXACTLY as it appears (including typos or punctuation) so the software can find and highlight it.
-- If the text is too long, quote the first 10 words ... last 10 words.
-- If the issue is a "Missing Skill" (not text), leave 'original_text' empty.
+- Quote resume text EXACTLY for highlighting.
 
 CRITICAL INSTRUCTIONS FOR 'improvement':
-- Do not just complain. Fix it.
-- Bad: "Add metrics."
-- Good: "Rewrite as: 'Reduced server costs by 20% ($5k/mo) by optimizing AWS EC2 instances.'"
+- Use active voice and metrics.
 `
 
       const completion = await aiClient.chat.completions.create({
