@@ -29,11 +29,27 @@ export default function PreferencesForm({ initialPreferences }: { initialPrefere
     const [preferences, setPreferences] = useState<string[]>(initialPreferences)
     const [isSaving, setIsSaving] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+    const [customPreference, setCustomPreference] = useState('')
 
     const togglePreference = (pref: string) => {
         setPreferences((prev) =>
             prev.includes(pref) ? prev.filter((p) => p !== pref) : [...prev, pref]
         )
+    }
+
+
+    const addCustomPreference = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            if (customPreference.trim() && !preferences.includes(customPreference.trim())) {
+                setPreferences([...preferences, customPreference.trim()])
+                setCustomPreference('')
+            }
+        }
+    }
+
+    const removePreference = (pref: string) => {
+        setPreferences(prev => prev.filter(p => p !== pref))
     }
 
     const handleSave = async () => {
@@ -85,6 +101,34 @@ export default function PreferencesForm({ initialPreferences }: { initialPrefere
                             </button>
                         )
                     })}
+                </div>
+
+                {/* Custom Preference Input */}
+                <div className="mt-6">
+                    <input
+                        type="text"
+                        value={customPreference}
+                        onChange={(e) => setCustomPreference(e.target.value)}
+                        onKeyDown={addCustomPreference}
+                        className="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-foreground shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-primary sm:text-sm"
+                        placeholder="Type other role and press Enter..."
+                    />
+                </div>
+
+                {/* Selected Custom Preferences */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                    {preferences.filter(p => !JOB_PREFERENCES.includes(p)).map(pref => (
+                        <span key={pref} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/20 text-primary border border-primary/30">
+                            {pref}
+                            <button
+                                type="button"
+                                onClick={() => removePreference(pref)}
+                                className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-primary/30 focus:outline-none"
+                            >
+                                &times;
+                            </button>
+                        </span>
+                    ))}
                 </div>
 
                 {message && (
