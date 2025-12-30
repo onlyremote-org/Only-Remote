@@ -1,0 +1,96 @@
+import { Job, FetchJobsParams } from './types'
+
+const API_KEY = process.env.ACTIVE_JOBS_API_KEY
+const API_HOST = 'active-jobs-db.p.rapidapi.com'
+const BASE_URL = `https://${API_HOST}/active-ats-7d`
+
+interface ActiveJob {
+    id: string
+    title: string
+    organization: string
+    organization_logo?: string
+    date_posted: string
+    url: string
+    description_text?: string
+    description_html?: string
+    salary_raw?: any
+    ai_salary_value?: number
+    ai_salary_currency?: string
+    ai_salary_unittext?: string
+    location_derived?: string[]
+    employment_type?: string[]
+    source?: string
+}
+
+export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
+    if (!API_KEY) {
+        console.warn('Active Jobs API Key is missing')
+        return []
+    }
+
+    try {
+        const queryParams = new URLSearchParams({
+            limit: '50', // Fetch a decent chunk
+            offset: '0',
+            remote: 'true', // Force remote
+            description_type: 'text', // We format it ourselves or use snippet
+            include_ai: 'true', // For salary
+            source: 'adp,greenhouse,workable', // User requested strict filtering
+        })
+
+        if (params.q) {
+            queryParams.append('title_filter', params.q)
+        }
+
+        if (params.location) {
+            queryParams.append('location_filter', params.location)
+        }
+
+        const response = await fetch(`${BASE_URL}?${queryParams.toString()}`, {
+            headers: {
+                'x-rapidapi-key': API_KEY,
+                'x-rapidapi-host': API_HOST,
+            },
+            next: { revalidate: 3600 }, // Cache for 1 hour
+        })
+
+        if (!response.ok) {
+            console.error(`Active Jobs API failed: ${response.status} ${response.statusText}`)
+            return []
+        }
+
+        const data = await response.json() as ActiveJob[]
+        if (!Array.isArray(data)) return []
+
+        return data.map(transformJob)
+
+    } catch (error) {
+        console.error('Error fetching Active Jobs:', error)
+        return []
+    }
+}
+
+function transformJob(job: ActiveJob): Job {
+    let salary = null
+    if (job.ai_salary_value && job.ai_salary_currency) {
+        salary = `${job.ai_salary_currency} ${job.ai_salary_value.toLocaleString()} ${job.ai_salary_unittext || ''}`.trim()
+    }
+
+    return {
+        id: job.id,
+        title: job.title,
+        company: job.organization,
+        location: job.location_derived?.join(', ') || 'Remote',
+        category: [], // API has taxonomies but we can skip mapping for now or map ai_taxonomies_a
+        job_type: job.employment_type?.[0] || 'Full-time',
+        salary: salary,
+        tags: [],
+        description_snippet: job.description_text?.slice(0, 300) + '...' || '',
+        source: 'fantastic-jobs',
+        source_url: job.url,
+        apply_url: job.url,
+        published_at: job.date_posted,
+        company_logo: job.organization_logo || null,
+        // We could use ai_taxonomies_a_primary_filter for category if needed
+    }
+}

@@ -15,6 +15,17 @@ interface JobDetailModalProps {
 export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
     const [iframeError, setIframeError] = useState(false)
 
+    // Domains that are known to block iframe embedding (X-Frame-Options: SAMEORIGIN)
+    const UNEMBEDDABLE_DOMAINS = [
+        'workday.com',
+        'join.com',
+        'greenhouse.io', // Sometimes blocks
+        'lever.co',
+        'jobs.gem.com'
+    ]
+
+    const isUnembeddable = job.apply_url && UNEMBEDDABLE_DOMAINS.some(d => job.apply_url.includes(d))
+
     // Reset error when job changes
     if (!isOpen && iframeError) setIframeError(false)
 
@@ -66,7 +77,7 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
 
                 {/* Content - Iframe or Fallback */}
                 <div className="flex-1 bg-white relative w-full h-full">
-                    {!iframeError ? (
+                    {!iframeError && !isUnembeddable ? (
                         <iframe
                             src={job.apply_url}
                             className="w-full h-full border-0"

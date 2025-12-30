@@ -4,9 +4,10 @@ import { fetchRemoteOKJobs } from './remoteok'
 import { fetchHimalayasJobs } from './himalayas'
 import { fetchOpenWebNinjaJobs } from './openwebninja'
 import { fetchH1BJobs } from './h1b'
+import { fetchActiveJobs } from './active-jobs'
 
 export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: string[] }): Promise<{ jobs: Job[], total: number }> {
-    const sources = params.sources || ['remotive', 'remoteok', 'himalayas', 'openwebninja']
+    const sources = params.sources || ['remotive', 'remoteok', 'himalayas', 'openwebninja', 'fantastic-jobs']
 
     const promises: Promise<Job[]>[] = []
 
@@ -14,6 +15,7 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
     if (sources.includes('remoteok')) promises.push(fetchRemoteOKJobs(params))
     // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
     if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs(params))
+    if (sources.includes('fantastic-jobs')) promises.push(fetchActiveJobs(params))
 
     // Always fetch H1B if not explicitly excluded, or if specifically requested
     // For now, we'll just add it to the mix
@@ -29,8 +31,24 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
         }
     })
 
-    // Deduplicate by ID
-    const uniqueJobs = Array.from(new Map(allJobs.map(job => [job.id, job])).values())
+    // Deduplicate by ID and Semantics (Title + Company)
+    const seenIds = new Set<string>()
+    const seenSignatures = new Set<string>()
+    const uniqueJobs: Job[] = []
+
+    allJobs.forEach(job => {
+        // 1. Check ID
+        if (seenIds.has(job.id)) return
+
+        // 2. Check Semantic Signature (Title + Company)
+        // This handles multi-location duplicates (e.g. "Software Engineer" at "Google" listed 5 times)
+        const signature = `${job.title.toLowerCase().trim()}|${job.company.toLowerCase().trim()}`
+        if (seenSignatures.has(signature)) return
+
+        seenIds.add(job.id)
+        seenSignatures.add(signature)
+        uniqueJobs.push(job)
+    })
 
     // Filter jobs
     let filteredJobs = uniqueJobs
