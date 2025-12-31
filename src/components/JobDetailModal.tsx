@@ -15,9 +15,9 @@ interface JobDetailModalProps {
 export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
     const [iframeError, setIframeError] = useState(false)
 
-    // Domains that are known to block iframe embedding (X-Frame-Options: SAMEORIGIN)
     const UNEMBEDDABLE_DOMAINS = [
         'workday.com',
+        'myworkdayjobs.com', // Covers *.wd5.myworkdayjobs.com
         'join.com',
         'greenhouse.io', // Sometimes blocks
         'lever.co',

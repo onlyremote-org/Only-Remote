@@ -5,9 +5,12 @@ import { fetchHimalayasJobs } from './himalayas'
 import { fetchOpenWebNinjaJobs } from './openwebninja'
 import { fetchH1BJobs } from './h1b'
 import { fetchActiveJobs } from './active-jobs'
+import { fetchRemoteInternJobs } from './remote-intern'
+import { fetchActiveInternJobs } from './active-intern'
+import { fetchSponsorshipJobs } from './sponsorship-all'
 
 export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: string[] }): Promise<{ jobs: Job[], total: number }> {
-    const sources = params.sources || ['remotive', 'remoteok', 'himalayas', 'openwebninja', 'fantastic-jobs']
+    const sources = params.sources || ['remotive', 'remoteok', 'himalayas', 'openwebninja', 'fantastic-jobs', 'remote-intern', 'active-intern', 'job-feed-sponsorship']
 
     const promises: Promise<Job[]>[] = []
 
@@ -16,6 +19,9 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
     // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
     if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs(params))
     if (sources.includes('fantastic-jobs')) promises.push(fetchActiveJobs(params))
+    if (sources.includes('remote-intern')) promises.push(fetchRemoteInternJobs(params))
+    if (sources.includes('active-intern')) promises.push(fetchActiveInternJobs(params))
+    if (sources.includes('job-feed-sponsorship')) promises.push(fetchSponsorshipJobs(params))
 
     // Always fetch H1B if not explicitly excluded, or if specifically requested
     // For now, we'll just add it to the mix
@@ -81,6 +87,10 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
                 (job.title && job.title.toLowerCase().includes('intern')) ||
                 (job.job_type && job.job_type.toLowerCase().includes('intern')) ||
                 (job.tags && job.tags.some(tag => tag.toLowerCase().includes('intern')))
+            )
+        } else if (params.job_type === 'global-sponsorship') {
+            filteredJobs = filteredJobs.filter(job =>
+                job.tags && job.tags.includes('Global Sponsorship')
             )
         } else {
             filteredJobs = filteredJobs.filter(job =>

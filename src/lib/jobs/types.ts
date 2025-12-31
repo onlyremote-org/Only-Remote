@@ -8,7 +8,7 @@ export interface Job {
     salary: string | null
     tags: string[]
     description_snippet: string
-    source: 'remotive' | 'remoteok' | 'himalayas' | 'openwebninja' | 'fantastic-jobs' | 'other'
+    source: 'remotive' | 'remoteok' | 'himalayas' | 'openwebninja' | 'fantastic-jobs' | 'remote-intern' | 'active-intern' | 'job-feed-sponsorship' | 'other'
     source_url: string
     apply_url: string
     published_at: string

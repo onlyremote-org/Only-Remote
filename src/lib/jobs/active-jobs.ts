@@ -28,6 +28,8 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
         return []
     }
 
+    console.log(`[ActiveJobs] Fetching with params: ${JSON.stringify(params)}`)
+
     try {
         const queryParams = new URLSearchParams({
             limit: '50', // Fetch a decent chunk
@@ -46,22 +48,31 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
             queryParams.append('location_filter', params.location)
         }
 
-        const response = await fetch(`${BASE_URL}?${queryParams.toString()}`, {
+        const url = `${BASE_URL}?${queryParams.toString()}`
+        console.log(`[ActiveJobs] Request URL: ${url}`)
+
+        const response = await fetch(url, {
             headers: {
                 'x-rapidapi-key': API_KEY,
                 'x-rapidapi-host': API_HOST,
             },
-            next: { revalidate: 3600 }, // Cache for 1 hour
+            next: { revalidate: 86400 }, // Cache for 24 hours (Low limit: ~20-25 req/month)
         })
 
         if (!response.ok) {
-            console.error(`Active Jobs API failed: ${response.status} ${response.statusText}`)
+            console.error(`[ActiveJobs] API failed: ${response.status} ${response.statusText}`)
+            const text = await response.text()
+            console.error(`[ActiveJobs] Error body: ${text}`)
             return []
         }
 
         const data = await response.json() as ActiveJob[]
-        if (!Array.isArray(data)) return []
+        if (!Array.isArray(data)) {
+            console.warn(`[ActiveJobs] Unexpected response structure (not an array)`)
+            return []
+        }
 
+        console.log(`[ActiveJobs] Success! Fetched ${data.length} jobs`)
         return data.map(transformJob)
 
     } catch (error) {
