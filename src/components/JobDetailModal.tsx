@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Job } from '@/lib/jobs/types'
 import { ExternalLink, X, Building2, MapPin, DollarSign, Briefcase } from 'lucide-react'
-import { Button } from './ui/button'
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 
 interface JobDetailModalProps {
