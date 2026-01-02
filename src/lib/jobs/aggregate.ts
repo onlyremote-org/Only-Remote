@@ -37,7 +37,8 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
 
     if (params.q) {
         // Support "OR" logic by splitting on " OR "
-        const queries = params.q.toLowerCase().split(' or ').map(s => s.trim()).filter(Boolean)
+        // Support "OR" logic by splitting on " OR "
+        const queries = params.q.toLowerCase().split(' or ').map(s => s.trim().replace(/"/g, '')).filter(Boolean)
 
         filteredJobs = filteredJobs.filter(job => {
             return queries.some(query =>

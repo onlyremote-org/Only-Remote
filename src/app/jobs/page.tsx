@@ -27,7 +27,10 @@ export default async function JobsPage(props: { searchParams: Promise<{ [key: st
     const { data: { user } } = await supabase.auth.getUser()
 
     let userPreferences: string[] = []
-    if (user && !q && !location && !jobType && !h1b) {
+    // Only fetch preferences if user is logged in and hasn't explicitly searched for a term.
+    // We allow preferences to apply even if location/job_type filters are active, 
+    // effectively making "Internship" mean "Internships matching my preferences".
+    if (user && !q) {
         const { data: profile } = await supabase
             .from('profiles')
             .select('job_preferences')
@@ -39,7 +42,9 @@ export default async function JobsPage(props: { searchParams: Promise<{ [key: st
         }
     }
 
-    const effectiveQ = q || (userPreferences.length > 0 ? userPreferences.join(' OR ') : undefined)
+    const effectiveQ = q || (userPreferences.length > 0
+        ? userPreferences.map(p => p.includes(' ') ? `"${p}"` : p).join(' OR ')
+        : undefined)
 
     const { jobs, total } = await fetchAggregatedJobs({
         limit,
