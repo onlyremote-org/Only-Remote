@@ -1,3 +1,4 @@
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -16,9 +17,11 @@ export default async function DashboardPage() {
     // Fetch profile
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('*')
         .eq('id', user.id)
         .single()
+
+    const isPremium = profile?.is_premium === true
 
     // Fetch stats
     const { count: savedJobsCount } = await supabase
@@ -36,13 +39,20 @@ export default async function DashboardPage() {
 
     return (
         <div className="max-w-6xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-foreground">
-                    Welcome back, {profile?.full_name?.split(' ')[0] || 'User'}
-                </h1>
-                <p className="mt-2 text-muted-foreground">
-                    Here's what's happening with your job search today.
-                </p>
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+                        Welcome back, {profile?.full_name?.split(' ')[0] || 'User'}
+                        {isPremium && (
+                            <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 px-3 py-1 text-xs font-medium text-amber-500 ring-1 ring-inset ring-amber-500/20">
+                                Premium
+                            </span>
+                        )}
+                    </h1>
+                    <p className="mt-2 text-muted-foreground">
+                        Here's what's happening with your job search today.
+                    </p>
+                </div>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -45,14 +45,19 @@ export default async function SubscriptionPage() {
         redirect('/login')
     }
 
-    const { data: subscription } = await supabase
-        .from('subscriptions')
+    const { data: profile } = await supabase
+        .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single()
 
-    const currentPlanId = subscription?.plan_id || 'free'
-    const isPro = currentPlanId === 'pro' && subscription?.status === 'active'
+    const isPro = profile?.is_premium === true
+
+    // Import actions dynamically or just assume they are available since we are in RSC
+    // We need to import them at the top really, but let's assume I add imports later? 
+    // Wait, replace_file_content doesn't let me add imports easily if I'm targeting this block.
+    // I should probably do a multi-replace or just one big replace.
+    // Let's do a replace of the logical block first.
 
     return (
         <div className="max-w-4xl mx-auto py-8">
@@ -119,17 +124,27 @@ export default async function SubscriptionPage() {
                                         Active
                                     </button>
                                 ) : (
-                                    <Link
-                                        href="/pricing"
-                                        className={classNames(
-                                            tier.id === 'pro'
-                                                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                                                : 'bg-card text-primary ring-1 ring-inset ring-primary/20 hover:ring-primary/30',
-                                            'block w-full rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-                                        )}
-                                    >
-                                        {tier.id === 'pro' ? 'Upgrade to Pro' : 'Downgrade to Free'}
-                                    </Link>
+                                    <form action={async () => {
+                                        'use server'
+                                        const { createPremiumCheckout, createPortalSession } = await import('@/app/actions/payment')
+                                        if (tier.id === 'pro') {
+                                            await createPremiumCheckout('/dashboard/subscription')
+                                        } else {
+                                            await createPortalSession()
+                                        }
+                                    }}>
+                                        <button
+                                            type="submit"
+                                            className={classNames(
+                                                tier.id === 'pro'
+                                                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                                    : 'bg-card text-primary ring-1 ring-inset ring-primary/20 hover:ring-primary/30',
+                                                'block w-full rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                                            )}
+                                        >
+                                            {tier.id === 'pro' ? 'Upgrade to Pro' : 'Manage Subscription'}
+                                        </button>
+                                    </form>
                                 )}
                             </div>
                         </div>

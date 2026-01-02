@@ -49,5 +49,11 @@ export async function completeOnboarding(_prevState: any, formData: FormData) {
     }
 
     revalidatePath('/jobs')
+
+    if (plan === 'pro') {
+        const { createPremiumCheckout } = await import('@/app/actions/payment')
+        await createPremiumCheckout('/jobs') // Redirect back to jobs after payment
+    }
+
     redirect('/jobs')
 }
