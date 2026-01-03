@@ -27,7 +27,9 @@ export default async function JobsPage(props: { searchParams: Promise<{ [key: st
     const { data: { user } } = await supabase.auth.getUser()
 
     let userPreferences: string[] = []
-    if (user && !q && !location && !jobType && !h1b) {
+    // Fix: Allow preferences to persist even if jobType/location filters are active.
+    // Only skip preferences if user is explicitly searching (q).
+    if (user && !q) {
         const { data: profile } = await supabase
             .from('profiles')
             .select('job_preferences')
