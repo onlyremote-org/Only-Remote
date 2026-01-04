@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
             if (error) {
                 console.error("Supabase update failed:", error);
-                return new Response("Database update failed", { status: 500 });
+                return new Response(`Database update failed: ${JSON.stringify(error)}`, { status: 500 });
             }
         }
 
