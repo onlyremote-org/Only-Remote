@@ -113,7 +113,20 @@ export default async function JobsPage(props: { searchParams: Promise<{ [key: st
                     </h2>
                     <p className="mt-4 text-lg leading-8 text-muted-foreground">
                         {userPreferences.length > 0 && !q ? (
-                            <span>Recommended for you based on your preferences: <span className="font-medium text-primary">{userPreferences.join(', ')}</span></span>
+                            <span>
+                                Recommended for you based on your preferences: {' '}
+                                {userPreferences.map((pref, index) => (
+                                    <span key={pref}>
+                                        <Link
+                                            href="/dashboard/preferences"
+                                            className="font-medium text-primary hover:underline hover:text-primary/80 transition-colors"
+                                        >
+                                            {pref}
+                                        </Link>
+                                        {index < userPreferences.length - 1 && ', '}
+                                    </span>
+                                ))}
+                            </span>
                         ) : (
                             "Curated remote jobs from the best sources across the web."
                         )}
