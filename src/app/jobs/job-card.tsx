@@ -74,7 +74,7 @@ export function JobCard({ job, isSaved: initialSaved = false, userName = '', mat
                             <p className="text-sm font-medium text-muted-foreground truncate">{job.company}</p>
                             {matchScore !== undefined && matchScore !== null && (
                                 <span className={cn(
-                                    "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
+                                    "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap",
                                     matchScore >= 80 ? "bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-900/30 dark:text-green-400 dark:ring-green-400/20" :
                                         matchScore >= 50 ? "bg-yellow-50 text-yellow-800 ring-yellow-600/20 dark:bg-yellow-900/30 dark:text-yellow-500 dark:ring-yellow-400/20" :
                                             "bg-gray-50 text-gray-600 ring-gray-500/10 dark:bg-gray-900/30 dark:text-gray-400 dark:ring-gray-400/20"

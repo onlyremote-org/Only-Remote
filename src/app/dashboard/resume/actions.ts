@@ -29,6 +29,18 @@ export async function uploadResume(_prevState: any, formData: FormData) {
     // Mock job description for matching (or let user input it)
     const jobDescription = "Looking for a Senior Frontend Engineer with React experience."
 
+    // Check limits
+    const { checkUsageLimit, incrementUsage } = await import('@/lib/limits')
+    const { allowed, limit, count } = await checkUsageLimit(user.id, 'resume_scan')
+
+    if (!allowed) {
+        return {
+            error: `You have reached your monthly limit of ${limit} resume scans. Upgrade to Pro for unlimited scans!`,
+            success: false,
+            data: null
+        }
+    }
+
     // Use the real AI service
     const { analyzeResume } = await import('@/lib/ai/resume')
     const scanResult = await analyzeResume(resumeText, jobDescription)
@@ -51,7 +63,12 @@ export async function uploadResume(_prevState: any, formData: FormData) {
     if (saveError) {
         console.error('Error saving resume:', saveError)
         // We don't fail the whole request if saving fails, but we should log it
+    } else {
+        // Increment usage count only on successful save/scan
+        await incrementUsage(user.id, 'resume_scan')
     }
+
+
 
     revalidatePath('/dashboard')
     return { success: true, data: scanResult, error: '' }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
+export const maxDuration = 60
+
 export async function POST(req: Request) {
     try {
         const { jobTitle, companyName, jobDescription, userName } = await req.json()
@@ -40,6 +42,28 @@ export async function POST(req: Request) {
                 { success: false, error: 'Missing required fields' },
                 { status: 400 }
             )
+        }
+
+        // Check limits if we have a user
+        if (userName) {
+            const { createClient } = await import('@/lib/supabase/server')
+            const supabase = await createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (user) {
+                const { checkUsageLimit, incrementUsage } = await import('@/lib/limits')
+                const { allowed, limit } = await checkUsageLimit(user.id, 'cover_letter')
+
+                if (!allowed) {
+                    return NextResponse.json(
+                        { success: false, error: `Limit reached: Upgrade to Pro for unlimited cover letters.` },
+                        { status: 403 }
+                    )
+                }
+
+                // Make specific to this user to increment later
+                // We'll increment AFTER success below
+            }
         }
 
         const apiKey = process.env.COVER_LETTER_API_KEY || process.env.OPENROUTER_API_KEY
@@ -85,9 +109,10 @@ export async function POST(req: Request) {
 
         const models = [
             'google/gemini-2.0-flash-exp:free',
+            'meta-llama/llama-3.3-70b-instruct:free',
             'meta-llama/llama-3.1-70b-instruct:free',
+            'liquid/lfm-40b:free',
             'mistralai/mistral-7b-instruct:free',
-            'microsoft/phi-3-medium-128k-instruct:free',
         ]
 
         let content = ''
@@ -115,6 +140,17 @@ export async function POST(req: Request) {
 
         if (!content) {
             throw lastError || new Error('All models failed to generate content')
+        }
+
+        // Increment usage if successful
+        if (content && userName) {
+            const { createClient } = await import('@/lib/supabase/server')
+            const supabase = await createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                const { incrementUsage } = await import('@/lib/limits')
+                await incrementUsage(user.id, 'cover_letter')
+            }
         }
 
         return NextResponse.json({ success: true, coverLetter: content })

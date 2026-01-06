@@ -115,8 +115,16 @@ export default function ResumePage() {
                     </form>
 
                     {error && (
-                        <div className="mt-4 rounded-md bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20">
-                            {error}
+                        <div className="mt-4 rounded-md bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <span>{error}</span>
+                            {(error.includes("Upgrade to Pro") || error.includes("monthly limit")) && (
+                                <a
+                                    href="/dashboard/subscription"
+                                    className="whitespace-nowrap rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                                >
+                                    Upgrade to Unlimited
+                                </a>
+                            )}
                         </div>
                     )}
 
@@ -124,7 +132,7 @@ export default function ResumePage() {
                         <div className="mt-8 border-t border-white/10 pt-8 space-y-8">
                             {/* Executive Summary */}
                             <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                                <div className="flex items-center justify-between mb-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
                                     <h3 className="text-xl font-bold text-foreground">Executive Summary</h3>
                                     <div className="flex items-center gap-3">
                                         <span className="text-sm text-muted-foreground">Overall Score</span>
@@ -136,7 +144,7 @@ export default function ResumePage() {
                                         </div>
                                     </div>
                                 </div>
-                                <p className="text-muted-foreground leading-relaxed">
+                                <p className="text-muted-foreground leading-relaxed break-words">
                                     {data.executive_summary}
                                 </p>
                             </div>
@@ -145,7 +153,7 @@ export default function ResumePage() {
                             <div className="grid gap-6 lg:grid-cols-3">
                                 {/* Impact Section */}
                                 <div className="bg-white/5 rounded-xl p-6 border border-white/10 lg:col-span-3">
-                                    <div className="flex items-center justify-between mb-6">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
                                         <h4 className="text-lg font-semibold text-foreground flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-blue-400"></span>
                                             Impact & Quantification
@@ -160,16 +168,16 @@ export default function ResumePage() {
                                                 <div key={i} className="bg-black/20 rounded-lg p-4 border border-white/5">
                                                     <div className="mb-2">
                                                         <span className="text-xs font-medium text-red-400 uppercase tracking-wider">Issue</span>
-                                                        <p className="text-sm text-foreground mt-1">{issue.issue}</p>
+                                                        <p className="text-sm text-foreground mt-1 break-words">{issue.issue}</p>
                                                     </div>
                                                     {issue.original_text && (
                                                         <div className="mb-3 pl-3 border-l-2 border-white/10">
-                                                            <p className="text-xs text-muted-foreground italic">"{issue.original_text}"</p>
+                                                            <p className="text-xs text-muted-foreground italic break-words">"{issue.original_text}"</p>
                                                         </div>
                                                     )}
                                                     <div>
                                                         <span className="text-xs font-medium text-green-400 uppercase tracking-wider">Fix</span>
-                                                        <p className="text-sm text-green-100 mt-1">{issue.improvement}</p>
+                                                        <p className="text-sm text-green-100 mt-1 break-words">{issue.improvement}</p>
                                                     </div>
                                                 </div>
                                             ))
@@ -179,7 +187,7 @@ export default function ResumePage() {
 
                                 {/* Terminology Section */}
                                 <div className="bg-white/5 rounded-xl p-6 border border-white/10 lg:col-span-3">
-                                    <div className="flex items-center justify-between mb-6">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
                                         <h4 className="text-lg font-semibold text-foreground flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-purple-400"></span>
                                             Technical Terminology
@@ -192,13 +200,13 @@ export default function ResumePage() {
                                         ) : (
                                             data.sections.terminology.issues.map((issue: any, i: number) => (
                                                 <div key={i} className="bg-black/20 rounded-lg p-4 border border-white/5">
-                                                    <div className="flex justify-between items-start gap-4">
-                                                        <div>
-                                                            <p className="text-sm text-foreground font-medium">{issue.issue}</p>
-                                                            <p className="text-sm text-green-400 mt-1">Suggestion: {issue.improvement}</p>
+                                                    <div className="flex flex-col sm:flex-row items-start gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm text-foreground font-medium break-words">{issue.issue}</p>
+                                                            <p className="text-sm text-green-400 mt-1 break-words">Suggestion: {issue.improvement}</p>
                                                         </div>
                                                         {issue.original_text && (
-                                                            <span className="text-xs bg-white/10 px-2 py-1 rounded text-muted-foreground whitespace-nowrap">
+                                                            <span className="text-xs bg-white/10 px-2 py-1 rounded text-muted-foreground break-words whitespace-normal max-w-full sm:max-w-[40%]">
                                                                 {issue.original_text}
                                                             </span>
                                                         )}
@@ -211,7 +219,7 @@ export default function ResumePage() {
 
                                 {/* Structure Section */}
                                 <div className="bg-white/5 rounded-xl p-6 border border-white/10 lg:col-span-3">
-                                    <div className="flex items-center justify-between mb-6">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
                                         <h4 className="text-lg font-semibold text-foreground flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-orange-400"></span>
                                             ATS Structure
@@ -224,13 +232,13 @@ export default function ResumePage() {
                                         ) : (
                                             data.sections.structure.issues.map((issue: any, i: number) => (
                                                 <div key={i} className="bg-black/20 rounded-lg p-4 border border-white/5">
-                                                    <div className="flex items-center gap-2 mb-2">
+                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
                                                         <span className="text-xs font-bold bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">
                                                             {issue.location_hint || 'General'}
                                                         </span>
                                                     </div>
-                                                    <p className="text-sm text-foreground">{issue.issue}</p>
-                                                    <p className="text-sm text-muted-foreground mt-1">{issue.improvement}</p>
+                                                    <p className="text-sm text-foreground break-words">{issue.issue}</p>
+                                                    <p className="text-sm text-muted-foreground mt-1 break-words">{issue.improvement}</p>
                                                 </div>
                                             ))
                                         )}
@@ -250,16 +258,6 @@ export default function ResumePage() {
                                     ))}
                                 </ul>
                             </div>
-
-                            <details className="mt-6 group">
-                                <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors list-none">
-                                    <span className="group-open:hidden">▶ View Raw JSON</span>
-                                    <span className="hidden group-open:inline">▼ Hide Raw JSON</span>
-                                </summary>
-                                <pre className="mt-2 whitespace-pre-wrap rounded-md bg-black/50 p-4 text-xs text-green-400 overflow-auto border border-white/10 font-mono max-h-96">
-                                    {JSON.stringify(data, null, 2)}
-                                </pre>
-                            </details>
                         </div>
                     )}
                 </div>
