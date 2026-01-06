@@ -32,16 +32,26 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
 
     try {
         const queryParams = new URLSearchParams({
-            limit: '50', // Fetch a decent chunk
+            limit: '50', // Max per docs for this specific endpoint might vary, keeping safe
             offset: '0',
-            remote: 'true', // Force remote
-            description_type: 'text', // We format it ourselves or use snippet
-            include_ai: 'true', // For salary
-            source: 'adp,greenhouse,workable', // User requested strict filtering
+            remote: 'true',
+            description_type: 'text',
+            include_ai: 'true',
+            source: 'adp,greenhouse,workable' // Strict source filter
         })
 
         if (params.q) {
-            queryParams.append('title_filter', params.q)
+            // Check for complex "OR" logic sent from page.tsx (quoted strings)
+            if (params.q.includes(' OR ')) {
+                // Convert "Unquoted" OR "Quoted" OR ... to advanced filter format: ('A' | 'B')
+                // 1. Replace double quotes with single quotes (API requirement for phrases)
+                // 2. Replace OR with |
+                // 3. Wrap in parenthesis
+                const advancedQuery = `(${params.q.replace(/"/g, "'").replace(/ OR /g, ' | ')})`
+                queryParams.append('advanced_title_filter', advancedQuery)
+            } else {
+                queryParams.append('title_filter', params.q)
+            }
         }
 
         if (params.location) {
@@ -87,21 +97,24 @@ function transformJob(job: ActiveJob): Job {
         salary = `${job.ai_salary_currency} ${job.ai_salary_value.toLocaleString()} ${job.ai_salary_unittext || ''}`.trim()
     }
 
+    const tags = []
+    if (job.employment_type) tags.push(...job.employment_type)
+
     return {
-        id: job.id,
+        id: `active-${job.id}`,
         title: job.title,
         company: job.organization,
-        location: job.location_derived?.join(', ') || 'Remote',
-        category: [], // API has taxonomies but we can skip mapping for now or map ai_taxonomies_a
+        location: job.location_derived?.[0] || 'Remote',
+        category: [],
         job_type: job.employment_type?.[0] || 'Full-time',
         salary: salary,
-        tags: [],
+        tags: tags,
         description_snippet: job.description_text?.slice(0, 300) + '...' || '',
         source: 'fantastic-jobs',
         source_url: job.url,
         apply_url: job.url,
         published_at: job.date_posted,
         company_logo: job.organization_logo || null,
-        // We could use ai_taxonomies_a_primary_filter for category if needed
+
     }
 }

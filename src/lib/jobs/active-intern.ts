@@ -32,23 +32,26 @@ export async function fetchActiveInternJobs(params: FetchJobsParams): Promise<Jo
 
     try {
         const queryParams = new URLSearchParams({
-            limit: '50', // Max allowed per docs (or close to it)
+            limit: '50',
             offset: '0',
-            remote: 'true', // Force remote
+            remote: 'true',
             description_type: 'text',
             include_ai: 'true',
-            ai_work_arrangement_filter: 'Remote OK,Remote Solely', // Granular remote filter
-            location_filter: 'United States', // User requested US only
+            ai_work_arrangement_filter: 'Remote OK,Remote Solely',
+            location_filter: 'United States' // US Only constraint
         })
 
         if (params.q) {
-            queryParams.append('title_filter', params.q)
+            if (params.q.includes(' OR ')) {
+                const advancedQuery = `(${params.q.replace(/"/g, "'").replace(/ OR /g, ' | ')})`
+                queryParams.append('advanced_title_filter', advancedQuery)
+            } else {
+                queryParams.append('title_filter', params.q)
+            }
         }
 
-        // We ignore params.location here because we are FORCING United States as per user request
-        // if (params.location) {
-        //     queryParams.append('location_filter', params.location)
-        // }
+        // Additional Post-Fetch Filters might be needed for logic not supported by API params
+        // But here we rely on the API for query
 
         const url = `${BASE_URL}?${queryParams.toString()}`
         console.log(`[ActiveIntern] Request URL: ${url}`)
@@ -68,7 +71,7 @@ export async function fetchActiveInternJobs(params: FetchJobsParams): Promise<Jo
             return []
         }
 
-        const data = await response.json() as ActiveInternJob[]
+        let data = await response.json() as ActiveInternJob[]
         if (!Array.isArray(data)) {
             console.warn(`[ActiveIntern] Unexpected response structure (not an array)`)
             return []
@@ -76,17 +79,15 @@ export async function fetchActiveInternJobs(params: FetchJobsParams): Promise<Jo
 
         console.log(`[ActiveIntern] Success! Fetched ${data.length} jobs`)
 
-        // Filter out Workday jobs as requested
-        const filteredData = data.filter(job => {
-            const isWorkday = job.url?.includes('myworkdayjobs') ||
-                job.url?.includes('workday.com') ||
-                job.organization?.toLowerCase().includes('workday')
+        // Filter: Exclude "Workday"
+        data = data.filter(job => {
+            const isWorkday = (job.source && job.source.toLowerCase().includes('workday')) ||
+                (job.url && job.url.includes('myworkdayjobs.com'))
             return !isWorkday
         })
+        console.log(`[ActiveIntern] After Workday filter: ${data.length} jobs`)
 
-        console.log(`[ActiveIntern] After Workday filter: ${filteredData.length} jobs`)
-
-        return filteredData.map(transformJob)
+        return data.map(transformJob)
 
     } catch (error) {
         console.error('Error fetching Active Intern Jobs:', error)
@@ -100,15 +101,17 @@ function transformJob(job: ActiveInternJob): Job {
         salary = `${job.ai_salary_currency} ${job.ai_salary_value.toLocaleString()} ${job.ai_salary_unittext || ''}`.trim()
     }
 
+    const tags = []
+    if (job.employment_type) tags.push(...job.employment_type)
     return {
         id: `active-intern-${job.id}`,
         title: job.title,
         company: job.organization,
-        location: job.location_derived?.join(', ') || 'Remote',
+        location: job.location_derived?.[0] || 'Remote',
         category: [],
-        job_type: 'Internship', // It's an internship API
+        job_type: 'Internship', // Always internship
         salary: salary,
-        tags: ['Internship'],
+        tags: tags,
         description_snippet: job.description_text?.slice(0, 300) + '...' || '',
         source: 'active-intern',
         source_url: job.url,
