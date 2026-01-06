@@ -22,6 +22,8 @@ export default async function DashboardPage() {
         .single()
 
     const isPremium = profile?.is_premium === true
+    const resumeCount = profile?.resume_scans_count || 0
+    const coverLetterCount = profile?.cover_letters_count || 0
 
     // Fetch stats
     const { count: savedJobsCount } = await supabase
@@ -36,6 +38,8 @@ export default async function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(1)
         .single()
+
+    const { UsageCard } = await import('@/components/dashboard/UsageCard')
 
     return (
         <div className="max-w-6xl mx-auto">
@@ -55,7 +59,7 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
                 {/* Stats Cards */}
                 <Link href="/dashboard/saved-jobs" className="block group">
                     <div className="relative overflow-hidden rounded-xl border border-white/10 bg-card p-6 shadow-lg transition-all hover:border-primary/20 hover:shadow-primary/5 group-hover:bg-white/5">
@@ -84,6 +88,11 @@ export default async function DashboardPage() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Usage Limits Section */}
+            <div className="mb-8">
+                <UsageCard isPro={isPremium} resumeCount={resumeCount} coverLetterCount={coverLetterCount} />
             </div>
         </div>
     )

@@ -4,9 +4,10 @@ import { ResumeAnalysisResponse } from './types'
 export async function analyzeResumeForAts(resumeText: string): Promise<ResumeAnalysisResponse | null> {
   const models = [
     process.env.OPENROUTER_RESUME_MODEL || 'google/gemini-2.0-flash-exp:free',
-    'meta-llama/llama-3-8b-instruct:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'nvidia/llama-3.1-nemotron-70b-instruct:free',
+    'meta-llama/llama-3.1-8b-instruct:free',
     'mistralai/mistral-7b-instruct:free',
-    'microsoft/phi-3-medium-128k-instruct:free'
   ]
 
   let lastError: Error | null = null

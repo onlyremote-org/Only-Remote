@@ -27,22 +27,44 @@ Provide the output in the following JSON format ONLY:
 }
 `
 
-        const completion = await aiClient.chat.completions.create({
-            model: 'mistralai/mistral-7b-instruct',
-            messages: [
-                { role: 'system', content: 'You are a helpful AI assistant that analyzes resumes and outputs JSON.' },
-                { role: 'user', content: prompt },
-            ],
-            response_format: { type: 'json_object' },
-        })
+        const models = [
+            'google/gemini-2.0-flash-exp:free',
+            'meta-llama/llama-3.3-70b-instruct:free',
+            'mistralai/mistral-7b-instruct:free',
+        ]
 
-        const content = completion.choices[0].message.content
-        if (!content) return null
+        let content = ''
+        let lastError = null
+
+        for (const model of models) {
+            try {
+                console.log(`Attempting to analyze resume with model: ${model}`)
+                const completion = await aiClient.chat.completions.create({
+                    model: model,
+                    messages: [
+                        { role: 'system', content: 'You are a helpful AI assistant that analyzes resumes and outputs JSON.' },
+                        { role: 'user', content: prompt },
+                    ],
+                    response_format: { type: 'json_object' },
+                })
+
+                content = completion.choices[0].message.content || ''
+                if (content) break // Success
+            } catch (error) {
+                console.warn(`Failed with model ${model}:`, error)
+                lastError = error
+                // Continue to next model
+            }
+        }
+
+        if (!content) {
+            throw lastError || new Error('All models failed to analyze resume')
+        }
 
         const result = JSON.parse(content) as ResumeAnalysis
         return result
     } catch (error) {
         console.error('Error analyzing resume:', error)
-        return null
+        throw error // Propagate error for UI handling
     }
 }

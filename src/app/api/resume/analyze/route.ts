@@ -4,6 +4,7 @@ import { analyzeResumeForAts } from '@/lib/ai/resumeAnalysis'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60 // Allow 60 seconds for AI processing
+// Force Rebuild Trigger
 
 export async function POST(request: NextRequest) {
     try {
@@ -81,6 +82,23 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Check limits
+        const { checkUsageLimit, incrementUsage } = await import('@/lib/limits')
+        const { allowed, limit } = await checkUsageLimit(user.id, 'resume_scan')
+
+        if (!allowed) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: {
+                        code: 'LIMIT_REACHED',
+                        message: `You have reached your monthly limit of ${limit} resume scans. Upgrade to Pro for unlimited scans!`
+                    }
+                },
+                { status: 403 }
+            )
+        }
+
         // Analyze with AI
         let analysis;
         try {
@@ -107,30 +125,25 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Save to database if user is authenticated
+        // Save to database
         try {
-            const { createClient } = await import('@/lib/supabase/server')
-            const supabase = await createClient()
-            const { data: { user } } = await supabase.auth.getUser()
-
-            if (user) {
-                await supabase.from('resumes').insert({
-                    user_id: user.id,
-                    file_name: file.name,
-                    // file_type is not in the schema
-                    score: analysis.overall_score,
-                    // executive_summary is inside analysis json
-                    analysis: analysis, // Schema expects 'analysis', not 'analysis_data'
-                    structured_resume: analysis.structured_resume, // Save structured data
-                    created_at: new Date().toISOString(),
-                })
-            }
+            await supabase.from('resumes').insert({
+                user_id: user.id,
+                file_name: file.name,
+                score: analysis.overall_score,
+                analysis: analysis,
+                structured_resume: analysis.structured_resume,
+                created_at: new Date().toISOString(),
+            })
         } catch (dbError) {
             console.error('Failed to save resume to DB:', dbError)
-            // We don't block the response if saving fails, but we log it
         }
 
+        // Increment Usage on Success
+        await incrementUsage(user.id, 'resume_scan')
+
         return NextResponse.json({ success: true, data: analysis })
+
     } catch (error) {
         console.error('Resume analysis error:', error)
         return NextResponse.json(

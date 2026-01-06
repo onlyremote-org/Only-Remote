@@ -115,8 +115,16 @@ export default function ResumePage() {
                     </form>
 
                     {error && (
-                        <div className="mt-4 rounded-md bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20">
-                            {error}
+                        <div className="mt-4 rounded-md bg-red-500/10 p-4 text-sm text-red-500 border border-red-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <span>{error}</span>
+                            {(error.includes("Upgrade to Pro") || error.includes("monthly limit")) && (
+                                <a
+                                    href="/dashboard/subscription"
+                                    className="whitespace-nowrap rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                                >
+                                    Upgrade to Unlimited
+                                </a>
+                            )}
                         </div>
                     )}
 

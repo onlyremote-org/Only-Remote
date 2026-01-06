@@ -47,7 +47,7 @@ export function CoverLetterModal({ isOpen, onClose, job, userName }: CoverLetter
             setCoverLetter(data.coverLetter)
         } catch (err) {
             console.error(err)
-            setError('Failed to generate cover letter. Please try again.')
+            setError(err instanceof Error ? err.message : 'Failed to generate cover letter')
         } finally {
             setIsLoading(false)
         }
@@ -105,13 +105,23 @@ export function CoverLetterModal({ isOpen, onClose, job, userName }: CoverLetter
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center h-64 space-y-4 text-center">
-                            <p className="text-red-400">{error}</p>
-                            <button
-                                onClick={generateCoverLetter}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
-                            >
-                                <RefreshCw className="h-4 w-4" /> Try Again
-                            </button>
+                            <p className="text-red-400 max-w-sm">{error}</p>
+
+                            {error.includes("Upgrade to Pro") || error.includes("monthly limit") ? (
+                                <a
+                                    href="/dashboard/subscription"
+                                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+                                >
+                                    Upgrade to Unlimited
+                                </a>
+                            ) : (
+                                <button
+                                    onClick={generateCoverLetter}
+                                    className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                                >
+                                    <RefreshCw className="h-4 w-4" /> Try Again
+                                </button>
+                            )}
                         </div>
                     ) : (
                         <textarea
@@ -127,14 +137,14 @@ export function CoverLetterModal({ isOpen, onClose, job, userName }: CoverLetter
                 <div className="flex items-center justify-end gap-3 p-6 border-t border-white/10 bg-card">
                     <button
                         onClick={handleCopy}
-                        disabled={isLoading || !coverLetter}
+                        disabled={isLoading || !coverLetter || !!error}
                         className="flex items-center gap-2 px-4 py-2 bg-white/5 text-foreground rounded-lg hover:bg-white/10 transition-colors disabled:opacity-50"
                     >
                         <Copy className="h-4 w-4" /> Copy
                     </button>
                     <button
                         onClick={handleDownload}
-                        disabled={isLoading || !coverLetter}
+                        disabled={isLoading || !coverLetter || !!error}
                         className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
                         <Download className="h-4 w-4" /> Download PDF
