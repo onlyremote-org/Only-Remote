@@ -18,7 +18,7 @@ interface SponsorshipJob {
     ai_salary_currency?: string
     ai_salary_unittext?: string
     location_derived?: string[]
-    locations_derived?: { city?: string, admin?: string, country: string }[] // Per docs
+    locations_derived?: { city?: string, admin?: string, country: string }[]
     employment_type?: string[]
     source?: string
     ai_visa_sponsorship?: boolean
@@ -34,17 +34,22 @@ export async function fetchSponsorshipJobs(params: FetchJobsParams): Promise<Job
 
     try {
         const queryParams = new URLSearchParams({
-            limit: '500', // Max allowed per docs (Basic plan)
+            limit: '500',
             offset: '0',
             remote: 'true',
             description_type: 'text',
             include_ai: 'true',
             ai_work_arrangement_filter: 'Remote OK,Remote Solely',
-            ai_visa_sponsorship_filter: 'true', // The key Requirement
+            ai_visa_sponsorship_filter: 'true',
         })
 
         if (params.q) {
-            queryParams.append('title_filter', params.q)
+            if (params.q.includes(' OR ')) {
+                const advancedQuery = `(${params.q.replace(/"/g, "'").replace(/ OR /g, ' | ')})`
+                queryParams.append('advanced_title_filter', advancedQuery)
+            } else {
+                queryParams.append('title_filter', params.q)
+            }
         }
 
         if (params.location) {
@@ -60,8 +65,7 @@ export async function fetchSponsorshipJobs(params: FetchJobsParams): Promise<Job
                 'x-rapidapi-host': API_HOST,
             },
             // LIMIT IS 5 REQUESTS PER MONTH!
-            // We must cache for ~7 days to be safe.
-            // 7 days = 604800 seconds
+
             next: { revalidate: 604800 },
         })
 
@@ -93,24 +97,18 @@ function transformJob(job: SponsorshipJob): Job {
         salary = `${job.ai_salary_currency} ${job.ai_salary_value.toLocaleString()} ${job.ai_salary_unittext || ''}`.trim()
     }
 
-    // Determine location and Visa Logic
-    // API docs say: locations_derived is text[] [{city, admin (state), country}]
-    // But sometimes it might be just strings. We'll handle both.
 
-    // We check if ANY derived location is US
     let isUS = false
     let locationString = 'Remote'
 
     if (job.location_derived && Array.isArray(job.location_derived)) {
-        // Convert to string for easy checking
+
         const locStr = JSON.stringify(job.location_derived).toLowerCase()
         if (locStr.includes('united states') || locStr.includes('"country":"us"')) {
             isUS = true
         }
 
-        // Try to make a readable string
-        // The API returns complex objects sometimes, but our type defines it as string[] in other places?
-        // Let's safe-map it.
+
         locationString = job.location_derived.map(l => {
             if (typeof l === 'string') return l
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,14 +117,12 @@ function transformJob(job: SponsorshipJob): Job {
         }).join(', ') || 'Remote'
     }
 
-    // Tag Logic
-    // User wants: USA -> H1B
-    // Other -> "Other Country Visa Sponsorship"
+
     const tags = ['Visa Sponsorship']
     if (isUS) {
         tags.push('H1B')
     } else {
-        tags.push('Global Sponsorship') // Cleaner name than "Other Country..."
+        tags.push('Global Sponsorship')
     }
 
     if (job.employment_type) tags.push(...job.employment_type)
@@ -146,6 +142,6 @@ function transformJob(job: SponsorshipJob): Job {
         apply_url: job.url,
         published_at: job.date_posted,
         company_logo: job.organization_logo || null,
-        // Important: this job ALWAYS has H1B/Sponsorship if it came from this API
+
     }
 }

@@ -32,6 +32,7 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
 
     try {
         const queryParams = new URLSearchParams({
+<<<<<<< HEAD
             limit: '50', // Fetch a decent chunk
             offset: '0',
             remote: 'true', // Force remote
@@ -42,6 +43,28 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
 
         if (params.q) {
             queryParams.append('title_filter', params.q)
+=======
+            limit: '50', // Max per docs for this specific endpoint might vary, keeping safe
+            offset: '0',
+            remote: 'true',
+            description_type: 'text',
+            include_ai: 'true',
+            source: 'adp,greenhouse,workable' // Strict source filter
+        })
+
+        if (params.q) {
+            // Check for complex "OR" logic sent from page.tsx (quoted strings)
+            if (params.q.includes(' OR ')) {
+                // Convert "Unquoted" OR "Quoted" OR ... to advanced filter format: ('A' | 'B')
+                // 1. Replace double quotes with single quotes (API requirement for phrases)
+                // 2. Replace OR with |
+                // 3. Wrap in parenthesis
+                const advancedQuery = `(${params.q.replace(/"/g, "'").replace(/ OR /g, ' | ')})`
+                queryParams.append('advanced_title_filter', advancedQuery)
+            } else {
+                queryParams.append('title_filter', params.q)
+            }
+>>>>>>> akin-changes
         }
 
         if (params.location) {
@@ -87,6 +110,7 @@ function transformJob(job: ActiveJob): Job {
         salary = `${job.ai_salary_currency} ${job.ai_salary_value.toLocaleString()} ${job.ai_salary_unittext || ''}`.trim()
     }
 
+<<<<<<< HEAD
     return {
         id: job.id,
         title: job.title,
@@ -96,12 +120,29 @@ function transformJob(job: ActiveJob): Job {
         job_type: job.employment_type?.[0] || 'Full-time',
         salary: salary,
         tags: [],
+=======
+    const tags = []
+    if (job.employment_type) tags.push(...job.employment_type)
+
+    return {
+        id: `active-${job.id}`,
+        title: job.title,
+        company: job.organization,
+        location: job.location_derived?.[0] || 'Remote',
+        category: [],
+        job_type: job.employment_type?.[0] || 'Full-time',
+        salary: salary,
+        tags: tags,
+>>>>>>> akin-changes
         description_snippet: job.description_text?.slice(0, 300) + '...' || '',
         source: 'fantastic-jobs',
         source_url: job.url,
         apply_url: job.url,
         published_at: job.date_posted,
         company_logo: job.organization_logo || null,
+<<<<<<< HEAD
         // We could use ai_taxonomies_a_primary_filter for category if needed
+=======
+>>>>>>> akin-changes
     }
 }
