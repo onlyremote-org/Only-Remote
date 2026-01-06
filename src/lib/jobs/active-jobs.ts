@@ -32,18 +32,6 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
 
     try {
         const queryParams = new URLSearchParams({
-<<<<<<< HEAD
-            limit: '50', // Fetch a decent chunk
-            offset: '0',
-            remote: 'true', // Force remote
-            description_type: 'text', // We format it ourselves or use snippet
-            include_ai: 'true', // For salary
-            source: 'adp,greenhouse,workable', // User requested strict filtering
-        })
-
-        if (params.q) {
-            queryParams.append('title_filter', params.q)
-=======
             limit: '50', // Max per docs for this specific endpoint might vary, keeping safe
             offset: '0',
             remote: 'true',
@@ -64,7 +52,6 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
             } else {
                 queryParams.append('title_filter', params.q)
             }
->>>>>>> akin-changes
         }
 
         if (params.location) {
@@ -110,17 +97,6 @@ function transformJob(job: ActiveJob): Job {
         salary = `${job.ai_salary_currency} ${job.ai_salary_value.toLocaleString()} ${job.ai_salary_unittext || ''}`.trim()
     }
 
-<<<<<<< HEAD
-    return {
-        id: job.id,
-        title: job.title,
-        company: job.organization,
-        location: job.location_derived?.join(', ') || 'Remote',
-        category: [], // API has taxonomies but we can skip mapping for now or map ai_taxonomies_a
-        job_type: job.employment_type?.[0] || 'Full-time',
-        salary: salary,
-        tags: [],
-=======
     const tags = []
     if (job.employment_type) tags.push(...job.employment_type)
 
@@ -133,16 +109,12 @@ function transformJob(job: ActiveJob): Job {
         job_type: job.employment_type?.[0] || 'Full-time',
         salary: salary,
         tags: tags,
->>>>>>> akin-changes
         description_snippet: job.description_text?.slice(0, 300) + '...' || '',
         source: 'fantastic-jobs',
         source_url: job.url,
         apply_url: job.url,
         published_at: job.date_posted,
         company_logo: job.organization_logo || null,
-<<<<<<< HEAD
-        // We could use ai_taxonomies_a_primary_filter for category if needed
-=======
->>>>>>> akin-changes
+
     }
 }
