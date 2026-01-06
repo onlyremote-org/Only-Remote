@@ -93,6 +93,7 @@ export function JobsFilter() {
                         <option value="freelance">Freelance</option>
                         <option value="internship">Internship</option>
                         <option value="h1b">H-1B Visa Sponsorship</option>
+                        <option value="global-sponsorship">Global Sponsorship</option>
                     </select>
                 </div>
 
