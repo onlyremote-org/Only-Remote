@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Job } from '@/lib/jobs/types'
 import { ExternalLink, X, Building2, MapPin, DollarSign, Briefcase } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { checkFrameHeaders } from '@/app/actions/check-frame'
 
 interface JobDetailModalProps {
     isOpen: boolean
@@ -14,20 +15,43 @@ interface JobDetailModalProps {
 
 export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
     const [iframeError, setIframeError] = useState(false)
+    const [canEmbed, setCanEmbed] = useState<boolean | null>(null) // null = loading
 
-    const UNEMBEDDABLE_DOMAINS = [
+    // Fast-fail list for known blockers to skip network check
+    const KNOWN_BLOCKERS = [
         'workday.com',
-        'myworkdayjobs.com', // Covers *.wd5.myworkdayjobs.com
+        'myworkdayjobs.com',
+        'riotgames.com',
+        'ascension.org',
         'join.com',
-        'greenhouse.io', // Sometimes blocks
-        'lever.co',
-        'jobs.gem.com'
     ]
 
-    const isUnembeddable = job.apply_url && UNEMBEDDABLE_DOMAINS.some(d => job.apply_url.includes(d))
+    useEffect(() => {
+        if (!isOpen || !job.apply_url) return
 
-    // Reset error when job changes
-    if (!isOpen && iframeError) setIframeError(false)
+        let mounted = true
+        setIframeError(false)
+
+        // 1. Check fast-fail list
+        if (KNOWN_BLOCKERS.some(d => job.apply_url?.includes(d))) {
+            setCanEmbed(false)
+            return
+        }
+
+        // 2. Perform server check
+        setCanEmbed(null) // Start loading
+        checkFrameHeaders(job.apply_url)
+            .then(result => {
+                if (mounted) {
+                    setCanEmbed(result.canEmbed)
+                }
+            })
+            .catch(() => {
+                if (mounted) setCanEmbed(false) // Fallback on error
+            })
+
+        return () => { mounted = false }
+    }, [isOpen, job.apply_url]) // Re-run when modal opens or url changes
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -77,7 +101,15 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
 
                 {/* Content - Iframe or Fallback */}
                 <div className="flex-1 bg-white relative w-full h-full">
-                    {!iframeError && !isUnembeddable ? (
+                    {/* Loading State */}
+                    {canEmbed === null && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-card z-10">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        </div>
+                    )}
+
+                    {/* Valid State */}
+                    {canEmbed === true && !iframeError ? (
                         <iframe
                             src={job.apply_url}
                             className="w-full h-full border-0"
@@ -87,26 +119,33 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
                             sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
                         />
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-4">
-                            <div className="p-4 rounded-full bg-muted">
-                                <ExternalLink className="h-8 w-8 text-muted-foreground" />
+                        // Fallback UI (renders if canEmbed is strictly false OR iframeError occurred)
+                        (canEmbed === false || iframeError) && (
+                            <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="p-4 rounded-full bg-muted">
+                                    <ExternalLink className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-foreground">
+                                        {canEmbed === false ? "Open in New Tab" : "Unable to load preview"}
+                                    </h3>
+                                    <p className="text-muted-foreground max-w-sm mt-2">
+                                        {canEmbed === false
+                                            ? "This application page cannot be displayed directly here due to the company's security settings."
+                                            : "The connection to this site was refused. Please open it directly."}
+                                    </p>
+                                </div>
+                                <Button size="lg" asChild className="mt-4">
+                                    <a href={job.apply_url} target="_blank" rel="noopener noreferrer">
+                                        Apply on Company Site
+                                    </a>
+                                </Button>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-semibold text-foreground">Unable to embed application page</h3>
-                                <p className="text-muted-foreground max-w-sm mt-2">
-                                    This company's website prevents embedding. You'll need to open it in a new tab to apply.
-                                </p>
-                            </div>
-                            <Button asChild>
-                                <a href={job.apply_url} target="_blank" rel="noopener noreferrer">
-                                    Open Application Page
-                                </a>
-                            </Button>
-                        </div>
+                        )
                     )}
 
-                    {/* Floating Fallback for mobile or if iframe works but is cramped */}
-                    <div className="absolute bottom-6 right-6 sm:hidden pointer-events-none">
+                    {/* Floating Fallback key for mobile */}
+                    <div className="absolute bottom-6 right-6 sm:hidden pointer-events-none z-20">
                         <Button asChild className="pointer-events-auto shadow-lg">
                             <a href={job.apply_url} target="_blank" rel="noopener noreferrer">
                                 Open Externally

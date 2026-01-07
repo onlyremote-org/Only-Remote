@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
+import { MAX_FREE_SCANS, MAX_FREE_COVER_LETTERS, UsageType } from './shared-limits'
 
-export const MAX_FREE_SCANS = 3
-export const MAX_FREE_COVER_LETTERS = 3
-
-export type UsageType = 'resume_scan' | 'cover_letter'
+export { MAX_FREE_SCANS, MAX_FREE_COVER_LETTERS }
+export type { UsageType }
 
 export async function checkUsageLimit(userId: string, type: UsageType) {
     const supabase = await createClient()

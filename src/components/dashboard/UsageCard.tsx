@@ -1,5 +1,10 @@
+'use client'
+
 import Link from 'next/link'
-import { MAX_FREE_SCANS, MAX_FREE_COVER_LETTERS } from '@/lib/limits'
+import { MAX_FREE_SCANS, MAX_FREE_COVER_LETTERS } from '@/lib/shared-limits'
+import { createPremiumCheckout } from '@/app/actions/payment'
+import { useTransition } from 'react'
+import { Loader2 } from 'lucide-react'
 
 interface UsageCardProps {
     isPro: boolean
@@ -8,6 +13,14 @@ interface UsageCardProps {
 }
 
 export function UsageCard({ isPro, resumeCount, coverLetterCount }: UsageCardProps) {
+    const [isPending, startTransition] = useTransition()
+
+    const handleUpgrade = () => {
+        startTransition(async () => {
+            await createPremiumCheckout()
+        })
+    }
+
     if (isPro) {
         return (
             <div className="rounded-xl border border-white/5 bg-white/5 p-6 shadow-2xl ring-1 ring-white/10">
@@ -60,12 +73,14 @@ export function UsageCard({ isPro, resumeCount, coverLetterCount }: UsageCardPro
                     </p>
                 </div>
                 {isLimitReached && (
-                    <Link
-                        href="/dashboard/subscription"
-                        className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    <button
+                        onClick={handleUpgrade}
+                        disabled={isPending}
+                        className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
+                        {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                         Upgrade to Pro
-                    </Link>
+                    </button>
                 )}
             </div>
 
@@ -100,8 +115,16 @@ export function UsageCard({ isPro, resumeCount, coverLetterCount }: UsageCardPro
             </div>
 
             <div className="mt-6 pt-4 border-t border-white/5">
-                <p className="text-xs text-muted-foreground text-center">
-                    Want more? <Link href="/dashboard/subscription" className="text-primary hover:underline">Upgrade to Pro</Link> for unlimited access.
+                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                    Want more?
+                    <button
+                        onClick={handleUpgrade}
+                        disabled={isPending}
+                        className="text-primary hover:underline hover:text-primary/80 transition-colors bg-transparent border-0 p-0 inline cursor-pointer disabled:opacity-50 font-medium"
+                    >
+                        Upgrade to Pro
+                    </button>
+                    for unlimited access.
                 </p>
             </div>
         </div>
