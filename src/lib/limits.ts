@@ -19,8 +19,8 @@ export async function checkUsageLimit(userId: string, type: UsageType) {
     }
 
     // Pro users are unlimited
-    // Check both subscription_tier string AND is_premium boolean for robustness
-    if (profile.subscription_tier === 'pro' || profile.is_premium === true) {
+    // We strictly rely on is_premium which is managed by the webhook
+    if (profile.is_premium === true) {
         return { allowed: true, limit: Infinity, count: 0 }
     }
 

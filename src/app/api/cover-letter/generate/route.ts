@@ -7,34 +7,30 @@ export async function POST(req: Request) {
     try {
         const { jobTitle, companyName, jobDescription, userName } = await req.json()
 
-        // Fetch user's latest structured resume if logged in
-        let userResumeContext = ''
-        if (userName) { // Assuming if userName is passed, we might have a user. Ideally we check auth.
-            const { createClient } = await import('@/lib/supabase/server')
-            const supabase = await createClient()
-            const { data: { user } } = await supabase.auth.getUser()
+        // Check authentication and limits first
+        const { createClient } = await import('@/lib/supabase/server')
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
 
-            if (user) {
-                const { data: resume } = await supabase
-                    .from('resumes')
-                    .select('structured_resume')
-                    .eq('user_id', user.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single()
+        if (user) {
+            const { checkUsageLimit } = await import('@/lib/limits')
+            const { allowed } = await checkUsageLimit(user.id, 'cover_letter')
 
-                if (resume?.structured_resume) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const r = resume.structured_resume as any
-                    userResumeContext = `
-                     CANDIDATE BACKGROND:
-                     Work Experience: ${JSON.stringify(r.professional_experience)}
-                     Education: ${JSON.stringify(r.education)}
-                     Skills: ${JSON.stringify(r.skills)}
-                     Projects: ${JSON.stringify(r.projects)}
-                     `
-                }
+            if (!allowed) {
+                return NextResponse.json(
+                    { success: false, error: `Limit reached: Upgrade to Pro for unlimited cover letters.` },
+                    { status: 403 }
+                )
             }
+        } else if (userName) {
+            // Optional: If you support guest users with different limits, handle here.
+            // But based on current logic, it seemed to rely on userName presence to assume 'user context'.
+            // Given the requirement is strict limits for users, we'll assume logged-in users are the primary concern.
+            // If they are NOT logged in, we might want to block or allow (depending on business rule).
+            // For now, I'll assume only logged-in users can generate (or free guests are unlimited? unlikely).
+            // I will err on side of caution: if no user, we proceed (assuming guest logic is handled elsewhere or is free/limited by IP which we don't have here).
+            // BUT the original code only checked limits 'if (userName)'.
+            // I will leave non-logged-in behavior as is (allow), but enforce strictly for logged-in.
         }
 
         if (!jobTitle || !companyName) {
@@ -44,25 +40,27 @@ export async function POST(req: Request) {
             )
         }
 
-        // Check limits if we have a user
-        if (userName) {
-            const { createClient } = await import('@/lib/supabase/server')
-            const supabase = await createClient()
-            const { data: { user } } = await supabase.auth.getUser()
+        // Fetch user's latest structured resume if logged in
+        let userResumeContext = ''
+        if (user) {
+            const { data: resume } = await supabase
+                .from('resumes')
+                .select('structured_resume')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single()
 
-            if (user) {
-                const { checkUsageLimit, incrementUsage } = await import('@/lib/limits')
-                const { allowed, limit } = await checkUsageLimit(user.id, 'cover_letter')
-
-                if (!allowed) {
-                    return NextResponse.json(
-                        { success: false, error: `Limit reached: Upgrade to Pro for unlimited cover letters.` },
-                        { status: 403 }
-                    )
-                }
-
-                // Make specific to this user to increment later
-                // We'll increment AFTER success below
+            if (resume?.structured_resume) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const r = resume.structured_resume as any
+                userResumeContext = `
+                    CANDIDATE BACKGROND:
+                    Work Experience: ${JSON.stringify(r.professional_experience)}
+                    Education: ${JSON.stringify(r.education)}
+                    Skills: ${JSON.stringify(r.skills)}
+                    Projects: ${JSON.stringify(r.projects)}
+                    `
             }
         }
 
@@ -143,14 +141,10 @@ export async function POST(req: Request) {
         }
 
         // Increment usage if successful
-        if (content && userName) {
-            const { createClient } = await import('@/lib/supabase/server')
-            const supabase = await createClient()
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                const { incrementUsage } = await import('@/lib/limits')
-                await incrementUsage(user.id, 'cover_letter')
-            }
+        // Increment usage if successful
+        if (content && user) {
+            const { incrementUsage } = await import('@/lib/limits')
+            await incrementUsage(user.id, 'cover_letter')
         }
 
         return NextResponse.json({ success: true, coverLetter: content })

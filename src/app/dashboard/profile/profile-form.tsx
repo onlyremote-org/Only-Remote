@@ -12,6 +12,7 @@ interface ProfileFormProps {
         full_name: string | null
         website: string | null
         subscription_tier: string | null
+        is_premium: boolean | null
     } | null
 }
 
@@ -73,7 +74,7 @@ export default function ProfileForm({ user, profile }: ProfileFormProps) {
                         <h3 className="text-xl font-semibold text-foreground">{profile?.full_name || 'User'}</h3>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
                         <span className="inline-flex items-center rounded-full bg-green-400/10 px-2.5 py-0.5 text-xs font-medium text-green-400 mt-2 ring-1 ring-inset ring-green-400/20">
-                            {profile?.subscription_tier === 'pro' ? 'Pro Member' : 'Free Plan'}
+                            {profile?.is_premium ? 'Pro Member' : 'Free Plan'}
                         </span>
                     </div>
                 </div>
