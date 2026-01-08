@@ -119,3 +119,4 @@ function transformJob(job: RemoteInternJob): Job {
         company_logo: job.company?.logo || null,
     }
 }
+

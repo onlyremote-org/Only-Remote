@@ -66,7 +66,7 @@ export async function fetchActiveJobs(params: FetchJobsParams): Promise<Job[]> {
                 'x-rapidapi-key': API_KEY,
                 'x-rapidapi-host': API_HOST,
             },
-            next: { revalidate: 86400 }, // Cache for 24 hours (Low limit: ~20-25 req/month)
+            next: { revalidate: 172800 }, // Cache for 48 hours (Low limit: ~20-25 req/month)
         })
 
         if (!response.ok) {
