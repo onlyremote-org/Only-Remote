@@ -8,9 +8,10 @@ import { fetchActiveJobs } from './active-jobs'
 import { fetchRemoteInternJobs } from './remote-intern'
 import { fetchActiveInternJobs } from './active-intern'
 import { fetchSponsorshipJobs } from './sponsorship-all'
+import { fetchYCJobs } from './ycombinator'
 
 export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: string[] }): Promise<{ jobs: Job[], total: number }> {
-    const sources = params.sources || ['remotive', 'remoteok', 'himalayas', 'openwebninja', 'fantastic-jobs', 'remote-intern', 'active-intern', 'job-feed-sponsorship']
+    const sources = params.sources || ['remotive', 'remoteok', 'himalayas', 'openwebninja', 'fantastic-jobs', 'remote-intern', 'active-intern', 'job-feed-sponsorship', 'ycombinator']
 
     const promises: Promise<Job[]>[] = []
     if (params.q) {
@@ -20,12 +21,14 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
             if (sources.includes('remoteok')) promises.push(fetchRemoteOKJobs({ ...params, q: query }))
             // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
             if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs({ ...params, q: query }))
+            if (sources.includes('ycombinator')) promises.push(fetchYCJobs({ ...params, q: query }))
         })
     } else {
         if (sources.includes('remotive')) promises.push(fetchRemotiveJobs(params))
         if (sources.includes('remoteok')) promises.push(fetchRemoteOKJobs(params))
         // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
         if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs(params))
+        if (sources.includes('ycombinator')) promises.push(fetchYCJobs(params))
     }
     if (sources.includes('fantastic-jobs')) promises.push(fetchActiveJobs(params))
     if (sources.includes('remote-intern')) promises.push(fetchRemoteInternJobs(params))
