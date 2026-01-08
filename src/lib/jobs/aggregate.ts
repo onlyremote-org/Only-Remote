@@ -13,11 +13,20 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
     const sources = params.sources || ['remotive', 'remoteok', 'himalayas', 'openwebninja', 'fantastic-jobs', 'remote-intern', 'active-intern', 'job-feed-sponsorship']
 
     const promises: Promise<Job[]>[] = []
-
-    if (sources.includes('remotive')) promises.push(fetchRemotiveJobs(params))
-    if (sources.includes('remoteok')) promises.push(fetchRemoteOKJobs(params))
-    // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
-    if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs(params))
+    if (params.q) {
+        const queries = params.q.toLowerCase().split(' or ').map(s => s.trim().replace(/"/g, '')).filter(Boolean)
+        queries.forEach(query => {
+            if (sources.includes('remotive')) promises.push(fetchRemotiveJobs({ ...params, q: query }))
+            if (sources.includes('remoteok')) promises.push(fetchRemoteOKJobs({ ...params, q: query }))
+            // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
+            if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs({ ...params, q: query }))
+        })
+    } else {
+        if (sources.includes('remotive')) promises.push(fetchRemotiveJobs(params))
+        if (sources.includes('remoteok')) promises.push(fetchRemoteOKJobs(params))
+        // if (sources.includes('himalayas')) promises.push(fetchHimalayasJobs(params))
+        if (sources.includes('openwebninja')) promises.push(fetchOpenWebNinjaJobs(params))
+    }
     if (sources.includes('fantastic-jobs')) promises.push(fetchActiveJobs(params))
     if (sources.includes('remote-intern')) promises.push(fetchRemoteInternJobs(params))
     if (sources.includes('active-intern')) promises.push(fetchActiveInternJobs(params))
@@ -61,8 +70,15 @@ export async function fetchAggregatedJobs(params: FetchJobsParams & { sources?: 
 
     if (params.q) {
         // Support "OR" logic by splitting on " OR "
-        // Support "OR" logic by splitting on " OR "
-        const queries = params.q.toLowerCase().split(' or ').map(s => s.trim().replace(/"/g, '')).filter(Boolean)
+        // If query contains "/", treat parts as OR (e.g., "ui/ux" → ["ui", "ux"])
+        // Also remove quotes from phrases (e.g., "Product Manager" → Product Manager)
+        const queries = params.q.toLowerCase().split(' or ').flatMap(q => {
+            const cleaned = q.trim().replace(/"/g, '')
+            if (cleaned.includes('/')) {
+                return cleaned.split('/').map(s => s.trim())
+            }
+            return [cleaned]
+        }).filter(Boolean)
 
         filteredJobs = filteredJobs.filter(job => {
             return queries.some(query =>

@@ -13,7 +13,7 @@ export async function fetchRemotiveJobs(params: FetchJobsParams): Promise<Job[]>
         if (params.category) url.searchParams.append('category', params.category)
         if (params.limit) url.searchParams.append('limit', params.limit.toString())
 
-        const response = await fetch(url.toString(), { cache: 'no-store' })
+        const response = await fetch(url.toString(), { cache: 'default' })
         if (!response.ok) {
             console.error(`Remotive API error: ${response.statusText}`)
             return []

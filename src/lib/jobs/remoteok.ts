@@ -20,7 +20,7 @@ export async function fetchRemoteOKJobs(params: FetchJobsParams): Promise<Job[]>
             headers: {
                 'User-Agent': 'OnlyRemote/1.0 (https://onlyremote.org)',
             },
-            cache: 'no-store'
+            cache: 'default'
         })
 
         if (!response.ok) {

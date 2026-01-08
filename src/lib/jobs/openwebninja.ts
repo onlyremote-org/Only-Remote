@@ -13,7 +13,7 @@ export async function fetchOpenWebNinjaJobs(params: FetchJobsParams): Promise<Jo
         if (params.q) url.searchParams.append('search', params.q)
         if (params.limit) url.searchParams.append('limit', params.limit.toString())
 
-        const response = await fetch(url.toString(), { cache: 'no-store' })
+        const response = await fetch(url.toString(), { cache: 'default' })
         if (!response.ok) {
             console.warn(`OpenWeb Ninja API error: ${response.statusText}`)
             return []
