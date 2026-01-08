@@ -2,9 +2,9 @@
 const LOGO_URL = "https://nbreuvbfwqtsxwcpgdeb.supabase.co/storage/v1/object/sign/Logo/logo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xYjM5MGE3Mi01ZmE3LTQ5OWYtYjdkMy1lYmI2ZGNjMjM2YjAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJMb2dvL2xvZ28ucG5nIiwiaWF0IjoxNzY1NjAyMDk0LCJleHAiOjQ4ODc2NjYwOTR9.YVt3kOfD1GMJIUG9GPbvbYnU9_vFtET1CEFnJ1MaqaU";
 
 export function getWelcomeEmailHtml(opts: { firstName?: string }) {
-    const name = opts.firstName || "there";
+  const name = opts.firstName || "there";
 
-    return `
+  return `
   <html>
     <body style="margin:0; padding:24px; background-color:#f9fafb; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; color:#0f172a;">
       <div style="max-width:520px; margin:0 auto;">
@@ -43,9 +43,9 @@ export function getWelcomeEmailHtml(opts: { firstName?: string }) {
 }
 
 export function getOnboardingEmailHtml(opts: { firstName?: string }) {
-    const name = opts.firstName || "there";
+  const name = opts.firstName || "there";
 
-    return `
+  return `
   <html>
     <body style="margin:0; padding:24px; background-color:#f9fafb; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; color:#0f172a;">
       <div style="max-width:520px; margin:0 auto;">
@@ -69,7 +69,7 @@ export function getOnboardingEmailHtml(opts: { firstName?: string }) {
           </p>
 
           <p style="margin:0; font-size:12px; color:#9ca3af;">
-            Go to your dashboard: <a href="https://onlyremote.org/app" style="color:#2563eb;">onlyremote.org/app</a>
+            Go to your dashboard: <a href="https://onlyremote.org/dashboard" style="color:#2563eb;">onlyremote.org/dashboard</a>
           </p>
         </div>
       </div>
@@ -79,24 +79,24 @@ export function getOnboardingEmailHtml(opts: { firstName?: string }) {
 }
 
 export function getSubscriptionEmailHtml(opts: {
-    firstName?: string;
-    planName: string;   // e.g. "Pro", "Free", "Pro trial"
-    status: "started" | "updated" | "cancelled";
+  firstName?: string;
+  planName: string;   // e.g. "Pro", "Free", "Pro trial"
+  status: "started" | "updated" | "cancelled";
 }) {
-    const name = opts.firstName || "there";
-    const plan = opts.planName;
+  const name = opts.firstName || "there";
+  const plan = opts.planName;
 
-    let intro: string;
+  let intro: string;
 
-    if (opts.status === "started") {
-        intro = `Your Only Remote ${plan} plan is now active 🎉`;
-    } else if (opts.status === "cancelled") {
-        intro = `Your Only Remote ${plan} plan has been cancelled.`;
-    } else {
-        intro = `Your Only Remote subscription has been updated to the ${plan} plan.`;
-    }
+  if (opts.status === "started") {
+    intro = `Your Only Remote ${plan} plan is now active 🎉`;
+  } else if (opts.status === "cancelled") {
+    intro = `Your Only Remote ${plan} plan has been cancelled.`;
+  } else {
+    intro = `Your Only Remote subscription has been updated to the ${plan} plan.`;
+  }
 
-    return `
+  return `
   <html>
     <body style="margin:0; padding:24px; background-color:#f9fafb; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; color:#0f172a;">
       <div style="max-width:520px; margin:0 auto;">
@@ -122,7 +122,7 @@ export function getSubscriptionEmailHtml(opts: {
           </ul>
 
           <p style="margin:0; font-size:12px; color:#9ca3af;">
-            Manage your plan from: <a href="https://onlyremote.org/app/profile" style="color:#2563eb;">Account settings</a>.
+            Manage your plan from: <a href="https://onlyremote.org/dashboard/profile" style="color:#2563eb;">Account settings</a>.
           </p>
         </div>
       </div>
