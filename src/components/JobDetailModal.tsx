@@ -24,6 +24,7 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
         'riotgames.com',
         'ascension.org',
         'join.com',
+        'recruitee.com',
     ]
 
     useEffect(() => {
