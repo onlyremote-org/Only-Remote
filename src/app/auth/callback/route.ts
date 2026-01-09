@@ -49,6 +49,11 @@ export async function GET(request: Request) {
                         onboarding_completed: false,
                     })
 
+                    // Optimization: Sync to Auth Metadata
+                    await supabase.auth.updateUser({
+                        data: { onboarding_completed: false }
+                    })
+
                     // Send Welcome Email
                     try {
                         const { sendWelcomeEmail } = await import('@/lib/email/events')

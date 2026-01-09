@@ -33,6 +33,13 @@ export async function completeOnboarding(_prevState: any, formData: FormData) {
         return { error: error.message }
     }
 
+    // Optimization: Sync to Auth Metadata to avoid DB calls in middleware
+    await supabase.auth.updateUser({
+        data: { onboarding_completed: true }
+    })
+
+
+
     // Send onboarding completion email
     try {
         const { sendOnboardingCompleteEmail } = await import('@/lib/email/events')
