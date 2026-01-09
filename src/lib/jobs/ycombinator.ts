@@ -24,39 +24,28 @@ export async function fetchYCJobs(params: FetchJobsParams): Promise<Job[]> {
     console.log(`[YCJobs] Fetching with params: ${JSON.stringify(params)}`)
 
     try {
+        // OPTIMIZATION: "Internal Filtering"
+        // We do NOT send search terms to the API to prevent cache fragmentation.
+        // We always fetch the same "Top 50 Remote Jobs" URL.
+        // This ensures Cache Hit Rate is nearly 100% and we stay under the 24 req/day limit.
         const queryParams = new URLSearchParams({
-            limit: '10', // Default returns 10 per page
+            limit: '50',
             offset: '0',
-            remote: 'true', // Hardcoded as requested
+            remote: 'true',
         })
 
-        if (params.q) {
-            // Check for complex "OR" logic
-            if (params.q.includes(' OR ')) {
-                // Convert "Unquoted" OR "Quoted" OR ... to advanced filter format: ('A' | 'B')
-                // 1. Replace double quotes with single quotes (API requirement for phrases)
-                // 2. Replace OR with |
-                // 3. Wrap in parenthesis
-                const advancedQuery = `(${params.q.replace(/"/g, "'").replace(/ OR /g, ' | ')})`
-                queryParams.append('advanced_title_filter', advancedQuery)
-            } else {
-                queryParams.append('title_filter', params.q)
-            }
-        }
-
-        if (params.location) {
-            queryParams.append('location_filter', params.location)
-        }
+        // NOTE: We deliberately IGNORE params.q and params.location here when building the URL!
+        // This keeps the URL identical for all users.
 
         const url = `${BASE_URL}?${queryParams.toString()}`
-        console.log(`[YCJobs] Request URL: ${url}`)
+        console.log(`[YCJobs] Request URL (Generic): ${url}`)
 
         const response = await fetch(url, {
             headers: {
-                'x-rapidapi-key': API_KEY,
+                'x-rapidapi-key': API_KEY || '', // Handle undefined key gracefully
                 'x-rapidapi-host': API_HOST,
             },
-            next: { revalidate: 21600 }, // Cache for 6 hours (24 req/day limit -> cautious usage)
+            next: { revalidate: 21600 }, // Cache for 6 hours
         })
 
         if (!response.ok) {
@@ -64,13 +53,35 @@ export async function fetchYCJobs(params: FetchJobsParams): Promise<Job[]> {
             return []
         }
 
-        const data = await response.json() as YCJob[]
+        let data = await response.json() as YCJob[]
         if (!Array.isArray(data)) {
             console.warn(`[YCJobs] Unexpected response structure (not an array)`)
             return []
         }
 
-        console.log(`[YCJobs] Success! Fetched ${data.length} jobs`)
+        console.log(`[YCJobs] Raw fetched: ${data.length} - Applying in-memory filters...`)
+
+        // IN-MEMORY FILTERING
+        // We filter the generic pool based on the specific user request
+        if (params.q) {
+            const queries = params.q.toLowerCase().split(' or ').map(s => s.trim().replace(/"/g, '')).filter(Boolean)
+            data = data.filter(job => {
+                const title = job.title?.toLowerCase() || ''
+                const company = job.organization?.toLowerCase() || ''
+                // Simple partial match
+                return queries.some(q => title.includes(q) || company.includes(q))
+            })
+        }
+
+        if (params.location) {
+            const locQuery = params.location.toLowerCase()
+            data = data.filter(job => {
+                const loc = (job.locations_derived?.[0] || job.job_location || job.location || 'Remote').toLowerCase()
+                return loc.includes(locQuery)
+            })
+        }
+
+        console.log(`[YCJobs] Success! Returning ${data.length} jobs after filter`)
         return data.map(transformJob)
 
     } catch (error) {
@@ -93,7 +104,7 @@ function transformJob(job: YCJob): Job {
         location: location,
         category: [],
         job_type: job.employment_type?.[0] || 'Full-time',
-        salary: null, // API doesn't seem to return salary often, or use AI fields if available (not seen in snippet)
+        salary: null, // API doesn't seem to return salary often
         tags: tags,
         description_snippet: job.description_text?.slice(0, 300) + '...' || '',
         source: 'ycombinator',
