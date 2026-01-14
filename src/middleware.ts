@@ -59,6 +59,20 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (user) {
+        // ... user is logged in ...
+    } else {
+        // Strict Protection:
+        // If user is NOT logged in, block access to protected routes.
+        // This prevents the "fill form -> submit -> fail" loop for users with lost sessions (e.g. from failed magic links).
+        const isOnboarding = request.nextUrl.pathname.startsWith('/onboarding')
+        const isDashboard = request.nextUrl.pathname.startsWith('/dashboard')
+
+        if (isOnboarding || isDashboard) {
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
+    }
+
+    if (user) {
         // Fetch profile to check onboarding status
         // OPTIMIZATION: Check metadata first to avoid DB call
         let isCompleted = user.user_metadata?.onboarding_completed
