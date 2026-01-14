@@ -28,8 +28,6 @@ export async function GET(request: Request) {
             let baseUrl = origin
             if (!isLocalEnv && forwardedHost) {
                 baseUrl = `https://${forwardedHost}`
-            } else if (process.env.NEXT_PUBLIC_APP_URL) {
-                baseUrl = process.env.NEXT_PUBLIC_APP_URL
             }
 
             // Check if user has a profile
