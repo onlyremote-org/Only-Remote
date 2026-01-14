@@ -83,6 +83,10 @@ export async function GET(request: Request) {
         }
     }
 
-    // return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/auth/auth-code-error`)
+    // "Soft Redirect" (Fail Open)
+    // Even if the code exchange failed (e.g. consumed by email scanner),
+    // we redirect the user to the app. 
+    // - If they have a session cookie (from pre-fetch), it works.
+    // - If not, Middleware will redirect them to Login (better than an Error page).
+    return NextResponse.redirect(`${origin}${next}`)
 }
