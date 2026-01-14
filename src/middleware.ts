@@ -60,15 +60,23 @@ export async function middleware(request: NextRequest) {
 
     if (user) {
         // Fetch profile to check onboarding status
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('onboarding_completed')
-            .eq('id', user.id)
-            .single()
+        // OPTIMIZATION: Check metadata first to avoid DB call
+        let isCompleted = user.user_metadata?.onboarding_completed
+
+        // Fallback to DB if metadata is missing (migration support)
+        if (isCompleted === undefined) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('onboarding_completed')
+                .eq('id', user.id)
+                .single()
+
+            isCompleted = profile?.onboarding_completed
+        }
 
         const isOnboarding = request.nextUrl.pathname.startsWith('/onboarding')
         const isAuthRoute = request.nextUrl.pathname.startsWith('/auth') || request.nextUrl.pathname.startsWith('/verify-email')
-        const isCompleted = profile?.onboarding_completed
+
 
         // If not completed and not on onboarding (and not an auth route), redirect to onboarding
         if (!isCompleted && !isOnboarding && !isAuthRoute) {

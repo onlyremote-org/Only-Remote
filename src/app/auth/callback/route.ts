@@ -9,7 +9,16 @@ export async function GET(request: Request) {
 
     if (code) {
         const supabase = await createClient()
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        // Use 'let' so we can suppress the error if needed
+        let { error } = await supabase.auth.exchangeCodeForSession(code)
+
+        // If error, check if we are already logged in (Double Request Bug fix)
+        if (error) {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                error = null // Suppress error, we are good
+            }
+        }
 
         if (!error) {
             const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
@@ -47,6 +56,11 @@ export async function GET(request: Request) {
                         last_name: lastName,
                         plan: 'free',
                         onboarding_completed: false,
+                    })
+
+                    // Optimization: Sync to Auth Metadata
+                    await supabase.auth.updateUser({
+                        data: { onboarding_completed: false }
                     })
 
                     // Send Welcome Email
