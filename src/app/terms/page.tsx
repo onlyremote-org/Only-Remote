@@ -29,9 +29,15 @@ export default function TermsPage() {
                             You agree not to use the service for any unlawful purpose or in any way that interrupts, damages, or impairs the service. You may not scrape, harvest, or collect data from our website without our express written consent.
                         </p>
 
-                        <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">5. Subscription and Payments</h2>
+                        <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">5. Subscriptions & Payments</h2>
                         <p className="text-muted-foreground mb-4">
-                            Some features may require a paid subscription. By subscribing, you agree to pay the applicable fees. We reserve the right to change our pricing at any time.
+                            Only Remote offers optional paid subscriptions that grant access to premium tools and AI‑powered features, including but not limited to resume analysis, application tailoring, and cover‑letter generation. Subscriptions provide enhanced functionality within the platform and do not sell, license, or transfer ownership of any job listings or third‑party content displayed on the site.
+                        </p>
+                        <p className="text-muted-foreground mb-4">
+                            Job listings are aggregated from publicly available sources and external providers, and are shown for informational and convenience purposes only. Only Remote does not guarantee that any listing is current, accurate, or will result in employment, and is not responsible for changes, removals, or errors in third‑party job data.
+                        </p>
+                        <p className="text-muted-foreground mb-4">
+                            Subscription fees are charged in exchange for access to our premium features and AI tools, not for access to any specific job or hiring outcome.
                         </p>
 
                         <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">6. Termination</h2>

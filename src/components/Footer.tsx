@@ -99,6 +99,9 @@ export default function Footer() {
                     <p className="text-xs leading-5 text-muted-foreground">
                         &copy; {new Date().getFullYear()} Only Remote, Inc. All rights reserved.
                     </p>
+                    <p className="mt-4 text-xs leading-5 text-muted-foreground/60 max-w-2xl mx-auto">
+                        Disclaimer: Job listings are aggregated from publicly available sources and third‑party APIs. We do not claim ownership of any job postings, and availability or accuracy of listings is not guaranteed.
+                    </p>
                 </div>
             </div>
         </footer>

@@ -18,6 +18,10 @@ export default function PrivacyPage() {
                         <p className="text-muted-foreground mb-4">
                             We collect information you provide directly to us, such as when you create an account, update your profile, or contact us.
                         </p>
+                        <h3 className="text-lg font-medium text-foreground mt-6 mb-2">Subscription & Payment Data</h3>
+                        <p className="text-muted-foreground mb-4">
+                            When you purchase a subscription, we collect payment‑related information (such as transaction IDs and billing details) from our payment provider so we can manage your account, verify your purchase, and provide access to premium features. Payment card details are processed and stored by our third‑party payment processor and are not stored in full on Only Remote’s servers.
+                        </p>
                         <h3 className="text-lg font-medium text-foreground mt-6 mb-2">Google User Data</h3>
                         <p className="text-muted-foreground mb-4">
                             If you choose to sign in with Google, we collect the following information from your Google profile:
@@ -29,6 +33,11 @@ export default function PrivacyPage() {
                         </ul>
                         <p className="text-muted-foreground mb-4">
                             We do not access your contacts, Google Drive files, or any other private data associated with your Google account.
+                        </p>
+
+                        <h3 className="text-lg font-medium text-foreground mt-6 mb-2">Third-Party Sources</h3>
+                        <p className="text-muted-foreground mb-4">
+                            We may obtain job listings and related data from publicly available sources and third‑party APIs. This information is used solely to display job opportunities to you and does not affect how your personal information is processed.
                         </p>
 
                         <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">3. How We Use Your Information</h2>
